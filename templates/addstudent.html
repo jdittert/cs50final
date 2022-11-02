@@ -1,0 +1,17 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Add Student
+{% endblock %}
+
+{% block main %}
+    <form action="/add_student" method="post">
+        <div class="mb-3">
+            <input autocomplete="off" autofocus class="form-control mx-auto w-auto" id="name" name="name" placeholder="Name" type="text">
+        </div>
+        <div class="mb-3">
+            <input class="form-control mx-auto w-auto" id="class" name="class" placeholder="Class" type="text">
+        </div>        
+        <button class="btn btn-primary" type="submit">Add Student</button>
+    </form>
+{% endblock %}

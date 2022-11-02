@@ -35,6 +35,24 @@ def index():
     # Show homepage
     return render_template("index.html")
 
+@app.route("/add_student", methods=["GET", "POST"])
+@login_required
+def add_student():
+    # Add students to a class
+
+    # If user reaches via POST
+    if request.method == "POST":
+        return apology("TODO")
+
+    else:
+        return render_template("addstudent.html")
+
+@app.route("/classes")
+@login_required
+def classes():
+    # Show teacher's active classes
+    return render_template("classes.html")
+
 @app.route("/login", methods=["GET", "POST"])
 def login():
     """Log user in"""
@@ -65,7 +83,7 @@ def login():
         session["user_id"] = rows[0]["id"]
 
         # Redirect user to home page
-        return redirect("/")
+        return redirect("/classes")
 
     # User reached route via GET (as by clicking a link or via redirect)
     else:
