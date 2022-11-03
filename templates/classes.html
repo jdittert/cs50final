@@ -8,4 +8,15 @@
     <div>
         <p>{{ message }}, {{ name }}!</p>
     </div>    
+    <div>
+        <p>Add a new class:</p>
+        <form action="/add_class" method="post">
+            <div class="mb-3">
+                <input autocomplete="off" class="form-control mx-auto w-auto" id="class" name="class" placeholder="Class Name" type="text">            
+                <input class="form-control mx-auto w-auto" id="subject" name="subject" placeholder="Subject" type="text">
+            </div>
+            <button class="btn btn-primary" type="submit">Add Class</button>
+        </form>
+        
+    </div>
 {% endblock %}

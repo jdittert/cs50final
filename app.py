@@ -35,6 +35,12 @@ def index():
     # Show homepage
     return render_template("index.html")
 
+@app.route("/add_class", methods=["POST"])
+@login_required
+def add_class():
+    # Add a class
+    return apology("TODO", 400)
+
 @app.route("/add_student", methods=["GET", "POST"])
 @login_required
 def add_student():
@@ -42,7 +48,7 @@ def add_student():
 
     # If user reaches via POST
     if request.method == "POST":
-        return apology("TODO")
+        return apology("TODO", 400)
 
     else:
         return render_template("addstudent.html")
@@ -55,10 +61,21 @@ def classes():
     teacher = db.execute(
         "SELECT * FROM users WHERE id = ?", session["user_id"]
     )
+    name = teacher[0]["usercase"]    
 
-    name = teacher[0]["usercase"]
-    message = "Howdy"          
-    return render_template("classes.html", name=name, message=message)
+    classes = db.execute(
+        "SELECT class FROM classes WHERE teacher = ?", session["user_id"]
+    )
+
+    # If there are no classes
+    if not classes:
+        message = "You have not entered any classes"
+        return render_template("classes.html", name=name, message=message)
+    
+    else:
+        message = "Here are you classes"
+        return render_template("classes.html", name=name, message=message)               
+    
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
