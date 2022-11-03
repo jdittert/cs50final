@@ -51,7 +51,14 @@ def add_student():
 @login_required
 def classes():
     # Show teacher's active classes
-    return render_template("classes.html")
+    # Pull classes from database
+    teacher = db.execute(
+        "SELECT * FROM users WHERE id = ?", session["user_id"]
+    )
+
+    name = teacher[0]["usercase"]
+    message = "Howdy"          
+    return render_template("classes.html", name=name, message=message)
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
