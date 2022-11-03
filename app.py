@@ -60,7 +60,26 @@ def add_student():
 
     # If user reaches via POST
     if request.method == "POST":
-        return apology("TODO", 400)
+        
+        # If name or class is left blank
+        if not request.form.get("name") or not request.form.get("class"):
+            return apology("Enter name and class", 400)
+
+        # Select for class ID
+        period = db.execute("SELECT id FROM classes WHERE class = ? AND teacher = ?", request.form.get("class"), session["user_id"])
+        period = int(period[0]["id"])
+        
+        # If class ID does not exist
+        if not period:
+            return apology("Class has not been created yet", 400)
+
+        # Successfully add student
+        else:
+            flash("Student added!")            
+            db.execute(
+                "INSERT INTO students (name, class, teacher) VALUES (?, ?, ?)", request.form.get("name"), period, session["user_id"]
+            )
+            return redirect("/classes")
 
     else:
         return render_template("addstudent.html")
