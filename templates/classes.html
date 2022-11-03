@@ -7,7 +7,27 @@
 {% block main %}
     <div>
         <p>{{ message }}, {{ name }}!</p>
-    </div>    
+    </div>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th class="text-start">Class</th>
+                <th class="text-start">Subject</th>
+                <th class="text-end">Make Groups</th>
+                <th class="text-end">Edit</th>                
+            </tr>
+        </thead>
+        <tbody>
+            {% for class in classes %}
+                <tr>
+                    <td class="text-start">{{ class.class }}</td>
+                    <td class="text-start">{{ class.subject }}</td>
+                    <td class="text-end"><button class="btn btn-primary" type="button">Make Groups</td>
+                    <td class="text-end"><button class="btn btn-primary" type="button">Edit Class</td>                    
+                </tr>
+            {% endfor %}
+        </tbody>        
+    </table>    
     <div>
         <p>Add a new class:</p>
         <form action="/add_class" method="post">
@@ -16,7 +36,6 @@
                 <input class="form-control mx-auto w-auto" id="subject" name="subject" placeholder="Subject" type="text">
             </div>
             <button class="btn btn-primary" type="submit">Add Class</button>
-        </form>
-        
+        </form>        
     </div>
 {% endblock %}

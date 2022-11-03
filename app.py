@@ -39,7 +39,19 @@ def index():
 @login_required
 def add_class():
     # Add a class
-    return apology("TODO", 400)
+    # Check for class field
+    if not request.form.get("class"):
+        return apology("please enter class name", 400)
+
+    # Check for subject field
+    if not request.form.get("subject"):
+        return apology("please enter subject", 400)
+
+    # Add class to database
+    db.execute(
+        "INSERT INTO classes (class, subject, teacher) VALUES (?, ?, ?)", request.form.get("class"), request.form.get("subject"), session["user_id"]
+        )
+    return redirect("/classes")
 
 @app.route("/add_student", methods=["GET", "POST"])
 @login_required
@@ -64,7 +76,7 @@ def classes():
     name = teacher[0]["usercase"]    
 
     classes = db.execute(
-        "SELECT class FROM classes WHERE teacher = ?", session["user_id"]
+        "SELECT * FROM classes WHERE teacher = ?", session["user_id"]
     )
 
     # If there are no classes
@@ -74,7 +86,7 @@ def classes():
     
     else:
         message = "Here are you classes"
-        return render_template("classes.html", name=name, message=message)               
+        return render_template("classes.html", name=name, message=message, classes=classes)               
     
 
 @app.route("/login", methods=["GET", "POST"])
