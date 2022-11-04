@@ -47,6 +47,11 @@ def add_class():
     if not request.form.get("subject"):
         return apology("please enter subject", 400)
 
+    # Check for unique class name
+    classname = db.execute("SELECT * FROM classes WHERE class = ?", request.form.get("class"))
+    if len(classname) != 0:
+        return apology("class name already used", 400)
+
     # Add class to database
     db.execute(
         "INSERT INTO classes (class, subject, teacher) VALUES (?, ?, ?)", request.form.get("class"), request.form.get("subject"), session["user_id"]
@@ -107,6 +112,21 @@ def classes():
         message = "Here are you classes"
         return render_template("classes.html", name=name, message=message, classes=classes)               
     
+@app.route("/group", methods=["GET", "POST"])
+def group():
+    # Group students
+
+    # User reaches via POST
+    if request.method == "POST":
+        return apology("TODO")
+
+    # User reaches via GET
+    else:
+        teacher = db.execute("SELECT * FROM users WHERE id = ?", session["user_id"])
+        name = teacher[0]["usercase"]                
+        students = db.execute("SELECT * FROM students WHERE class = ?", 1)
+        return render_template("group.html", name=name, students=students)
+
 
 @app.route("/login", methods=["GET", "POST"])
 def login():

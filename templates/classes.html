@@ -22,7 +22,11 @@
                 <tr>
                     <td class="text-start">{{ class.class }}</td>
                     <td class="text-start">{{ class.subject }}</td>
-                    <td class="text-end"><button class="btn btn-primary" type="button">Make Groups</td>
+                    <td class="text-end">
+                        <form action="/group" method="get">
+                            <button class="btn btn-primary" type="button" id="{{ class.class }}" name="{{ class.class}}" onclick="">Group Class</button>
+                        </form>
+                    </td>
                     <td class="text-end"><button class="btn btn-primary" type="button">Edit Class</td>                    
                 </tr>
             {% endfor %}
