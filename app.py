@@ -118,14 +118,19 @@ def group():
 
     # User reaches via POST
     if request.method == "POST":
-        return apology("TODO")
+        teacher = db.execute("SELECT * FROM users WHERE id = ?", session["user_id"])
+        name = teacher[0]["usercase"]
+        period = request.args.get("period")        
+        period_id = db.execute("SELECT * FROM classes WHERE teacher = ? and class = ?", session["user_id"], period)
+        periodx = period_id[0]["id"]                
+        students = db.execute("SELECT * FROM students WHERE class = ?", periodx)
+      
+        return render_template("group.html", name=name, period=period, students=students)
 
     # User reaches via GET
     else:
-        teacher = db.execute("SELECT * FROM users WHERE id = ?", session["user_id"])
-        name = teacher[0]["usercase"]                
-        students = db.execute("SELECT * FROM students WHERE class = ?", 1)
-        return render_template("group.html", name=name, students=students)
+        return apology("TODO")
+       
 
 
 @app.route("/login", methods=["GET", "POST"])
