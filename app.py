@@ -1,4 +1,5 @@
 import os
+import random
 
 from cs50 import SQL
 from flask import Flask, flash, redirect, render_template, request, session
@@ -6,7 +7,7 @@ from flask_session import Session
 from tempfile import mkdtemp
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from helpers import apology, login_required
+from helpers import apology, login_required, partition
 
 # Configure application
 app = Flask(__name__)
@@ -113,6 +114,7 @@ def classes():
         return render_template("classes.html", name=name, message=message, classes=classes)               
     
 @app.route("/group", methods=["GET", "POST"])
+@login_required
 def group():
     # Group students
 
@@ -122,16 +124,15 @@ def group():
         name = teacher[0]["usercase"]
         period = request.args.get("period")        
         period_id = db.execute("SELECT * FROM classes WHERE teacher = ? and class = ?", session["user_id"], period)
-        periodx = period_id[0]["id"]                
+        periodx = period_id[0]["id"]
+        classname = period_id[0]["class"]                
         students = db.execute("SELECT * FROM students WHERE class = ?", periodx)
       
-        return render_template("group.html", name=name, period=period, students=students)
+        return render_template("group.html", name=name, period=period, classname=classname, students=students)
 
     # User reaches via GET
     else:
-        return apology("TODO")
-       
-
+        return apology("TODO")       
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -178,6 +179,30 @@ def logout():
 
     # Redirect user to homepage
     return redirect("/")
+
+@app.route("/randomize", methods=["POST"])
+@login_required
+def randomize():
+    """Create random groups based on input"""
+    # Get specific class       
+    teacher = db.execute("SELECT * FROM users WHERE id = ?", session["user_id"])
+    name = teacher[0]["usercase"]
+    period = request.args.get("period")
+    classname = period        
+    period_id = db.execute("SELECT * FROM classes WHERE teacher = ? and class = ?", session["user_id"], period)
+    periodx = period_id[0]["id"]     
+
+    # Get list of students and turn them into a list           
+    students = db.execute("SELECT * FROM students WHERE class = ?", periodx)
+    student_lst = []
+    for i in range(len(students)):
+        student_lst.append(students[i]["name"])
+
+    # Make random groups
+    random.shuffle(student_lst)
+    groups = partition(student_lst, 4)
+
+    return render_template("randomize.html", classname=classname, groups=groups, name=name, period=period, students=students)
 
 @app.route("/register", methods=["GET", "POST"])
 def register():

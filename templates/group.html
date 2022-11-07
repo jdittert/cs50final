@@ -6,10 +6,12 @@
 
 {% block main %}
     <div>
-        <h2>{{ name }}'s {{ class }}</h2>
-    </div>
+        <h2>{{ name }}'s {{ period }}</h2>
+    </div>    
     <div>
-        <h3>{{ period }}</h3>
+        <form action="/randomize?period={{ classname }}" method="post">
+            <button class="btn, btn-primary" type="submit" id="randomize" name="randomize">Create Groups</button>
+        </form>
     </div>
     <div>
     <table class="table table-striped">

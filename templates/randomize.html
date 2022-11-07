@@ -1,0 +1,36 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Group
+{% endblock %}
+
+{% block main %}
+    <div>
+        <h2>{{ name }}'s {{ period }}</h2>
+    </div>    
+    <div>
+        <form action="/randomize?period={{ classname }}" method="post">
+            <button class="btn, btn-primary" type="submit" id="randomize" name="randomize">Create New Groups</button>
+        </form>
+    </div>
+    <div>
+        {% for group in groups %}
+        <div>
+            <table class="table table-striped">
+                <thead>
+                    <tr>                        
+                        <th class="text-start">Student</th>                                
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for student in group %}
+                        <tr>
+                            <td class="text-start">{{ student }}</td>                                                                    
+                        </tr>
+                    {% endfor %}
+                </tbody>        
+            </table>        
+        </div>
+        {% endfor %}    
+    </div>
+{% endblock %}
