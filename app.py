@@ -113,6 +113,35 @@ def classes():
         message = "Here are you classes"
         return render_template("classes.html", name=name, message=message, classes=classes)               
     
+@app.route("/delete", methods=["POST"])
+@login_required
+def delete():
+    # Confirm choice
+    # """todo"""
+
+    # Delete student
+    period = request.args.get("period")
+    student = request.args.get("studentid")
+    db.execute("DELETE FROM students WHERE id = ?", student)
+    flash("Student deleted.")
+    return redirect("/edit?period=" + period)
+
+@app.route("/edit", methods=["GET", "POST"])
+@login_required
+def edit():
+    # Group students  
+    
+    teacher = db.execute("SELECT * FROM users WHERE id = ?", session["user_id"])
+    name = teacher[0]["usercase"]
+    period = request.args.get("period")        
+    period_id = db.execute("SELECT * FROM classes WHERE teacher = ? and class = ?", session["user_id"], period)
+    periodx = period_id[0]["id"]
+    classname = period_id[0]["class"]                
+    students = db.execute("SELECT * FROM students WHERE class = ?", periodx)
+    genders = db.execute("SELECT * FROM gender")
+    
+    return render_template("edit.html", name=name, period=period, classname=classname, students=students, genders=genders)    
+
 @app.route("/group", methods=["GET", "POST"])
 @login_required
 def group():

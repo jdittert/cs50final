@@ -1,0 +1,59 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Edit Class
+{% endblock %}
+
+{% block main %}
+    <div>
+        <h2>{{ name }}'s {{ period }}</h2>
+    </div>    
+    <div>
+        <form action="/randomize?period={{ classname }}" method="post">
+            <button class="btn, btn-primary" type="submit" id="randomize" name="randomize">Create Groups</button>
+        </form>
+    </div>
+    <div>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th class="text-start">ID</th>
+                <th class="text-start">Student</th>  
+                <th class="text-start">Gender</th>    
+                <th class="text-end">Update</th> 
+                <th class="text-end">Delete</th>                         
+            </tr>
+        </thead>
+        <tbody>
+            {% for student in students %}
+                <tr>
+                    <td class="text-start">{{ student.id }}</td>
+                    <td class="text-start">{{ student.name }}</td>
+                    <td class="text-start">
+                        <select>           
+                            <option disabled selected>Not Set</option>                 
+                            {% for gender in genders %}
+                                {% if gender.id == student.gender %}
+                                    <option selected>{{ gender.gender }}</option>
+                                {% else %}
+                                    <option>{{ gender.gender }}</option>
+                                {% endif %}
+                            {% endfor %}
+                        </select>                        
+                    </td>     
+                    <td class="text-end">
+                        <form action="/update?studentid={{ student.id }}" method="post">
+                            <button class="btn, btn-primary" type="submit" id="update{{ student.id }}" name="update{{ student.id }}">Update</button>
+                        </form>
+                    </td>
+                    <td class="text-end">
+                        <form action="/delete?studentid={{ student.id }}&period={{ classname }}" method="post">
+                            <button class="btn, btn-primary" type="submit" id="delete{{ student.id }}" name="delete{{ student.id }}">Delete</button>
+                        </form>
+                    </td>                                       
+                </tr>
+            {% endfor %}
+        </tbody>        
+    </table>        
+    </div>
+{% endblock %}

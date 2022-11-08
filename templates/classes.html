@@ -27,7 +27,11 @@
                             <button class="btn btn-primary" type="submit" id="{{ class.class }}" name="{{ class.class}}">Group Class</button>
                         </form>
                     </td>
-                    <td class="text-end"><button class="btn btn-primary" type="button">Edit Class</td>                    
+                    <td class="text-end">
+                        <form action="/edit?period={{ class.class }}" method="post">
+                            <button class="btn btn-primary" type="submit" id="edit{{ class.class }}" name="edit{{ class.class }}">Edit Class</td>     
+                        </form>
+                    </td>               
                 </tr>
             {% endfor %}
         </tbody>        
