@@ -7,14 +7,15 @@
 {% block main %}
     <div>
         <p>{{ message }}, {{ name }}!</p>
-    </div>
+    </div>    
     <table class="table table-striped">
         <thead>
             <tr>
                 <th class="text-start">Class</th>
                 <th class="text-start">Subject</th>
                 <th class="text-end">Make Groups</th>
-                <th class="text-end">Edit</th>                
+                <th class="text-end">Edit</th> 
+                <th class="text-end">Archive</th>               
             </tr>
         </thead>
         <tbody>
@@ -31,7 +32,39 @@
                         <form action="/edit?period={{ class.class }}" method="post">
                             <button class="btn btn-primary" type="submit" id="edit{{ class.class }}" name="edit{{ class.class }}">Edit Class</td>     
                         </form>
-                    </td>               
+                    </td>
+                    <td class="text-end">
+                        <form action="/archive?period={{ class.class }}" method="post">
+                            <button class="btn btn-primary" type="submit" id="archive{{ class.class }}" name="archive{{ class.class }}">Archive</td>     
+                        </form>
+                    </td>                      
+                </tr>
+            {% endfor %}
+        </tbody>        
+    </table>    
+    <div>
+        <p>Archived Classes</p>
+    </div>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th class="text-start">Class</th>
+                <th class="text-start">Subject</th>   
+                <th class="text-end">Make Groups</th>   
+                <th class="text-end">Edit</th>          
+                <th class="text-end">Restore</th>               
+            </tr>
+        </thead>
+        <tbody>
+            {% for class in archived %}
+                <tr>
+                    <td class="text-start">{{ class.class }}</td>
+                    <td class="text-start" colspan="3">{{ class.subject }}</td>                    
+                    <td class="text-end">
+                        <form action="/restore?period={{ class.class }}" method="post">
+                            <button class="btn btn-primary" type="submit" id="restore{{ class.class }}" name="restore{{ class.class }}">Restore</td>     
+                        </form>
+                    </td>                      
                 </tr>
             {% endfor %}
         </tbody>        

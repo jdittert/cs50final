@@ -90,6 +90,22 @@ def add_student():
     else:
         return render_template("addstudent.html")
 
+@app.route("/archive", methods=["POST"])
+@login_required
+def archive():
+    # Get class id
+    teacher = db.execute("SELECT * FROM users WHERE id = ?", session["user_id"])
+    name = teacher[0]["usercase"]
+    period = request.args.get("period")        
+    period_id = db.execute("SELECT * FROM classes WHERE teacher = ? and class = ?", session["user_id"], period)
+    periodx = period_id[0]["id"]
+    yes = "yes"
+
+    # Archive class
+    db.execute("UPDATE classes SET archived = ? WHERE id = ?", yes, periodx)
+    flash("Class archived.")
+    return redirect("/classes")
+
 @app.route("/classes")
 @login_required
 def classes():
@@ -101,8 +117,10 @@ def classes():
     name = teacher[0]["usercase"]    
 
     classes = db.execute(
-        "SELECT * FROM classes WHERE teacher = ?", session["user_id"]
+        "SELECT * FROM classes WHERE teacher = ? AND archived = ?", session["user_id"], "no"
     )
+
+    archived = db.execute("SELECT * FROM classes WHERE teacher = ? AND archived = ?", session["user_id"], "yes")
 
     # If there are no classes
     if not classes:
@@ -111,7 +129,7 @@ def classes():
     
     else:
         message = "Here are you classes"
-        return render_template("classes.html", name=name, message=message, classes=classes)               
+        return render_template("classes.html", archived=archived, name=name, message=message, classes=classes)               
     
 @app.route("/delete", methods=["POST"])
 @login_required
@@ -275,3 +293,21 @@ def register():
     # User reaches route via GET
     else:
         return render_template("register.html")
+
+@app.route("/restore", methods=["POST"])
+@login_required
+def restore():
+    # Restore a class from archives
+    # Get class id
+    teacher = db.execute("SELECT * FROM users WHERE id = ?", session["user_id"])
+    name = teacher[0]["usercase"]
+    period = request.args.get("period")        
+    period_id = db.execute("SELECT * FROM classes WHERE teacher = ? and class = ?", session["user_id"], period)
+    periodx = period_id[0]["id"]
+    no = "no"
+
+    # Restore class
+    db.execute("UPDATE classes SET archived = ? WHERE id = ?", no, periodx)
+    flash("Class restored.")
+    
+    return redirect("/classes")
