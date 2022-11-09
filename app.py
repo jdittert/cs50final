@@ -160,6 +160,49 @@ def edit():
     
     return render_template("edit.html", name=name, period=period, classname=classname, students=students, genders=genders)    
 
+@app.route("/gender_homo", methods=["POST"])
+@login_required
+def gender_homo():
+    # Create random groups homogeneous by gender
+
+    # Get specific class       
+    teacher = db.execute("SELECT * FROM users WHERE id = ?", session["user_id"])
+    name = teacher[0]["usercase"]
+    period = request.args.get("period")
+    classname = period        
+    period_id = db.execute("SELECT * FROM classes WHERE teacher = ? and class = ?", session["user_id"], period)
+    periodx = period_id[0]["id"]        
+
+    # Get list of students and turn them into a list           
+    students = db.execute("SELECT * FROM students WHERE class = ?", periodx)
+    student_lst = []
+    
+    # Get list of male students
+    males = db.execute("SELECT * FROM students WHERE class = ? AND gender IN (SELECT id FROM gender WHERE gender = ?)", periodx, "Male")
+    male_lst = []
+    for i in range(len(males)):
+        male_lst.append(males[i]["name"])  
+
+    # Get list of female students
+    females = db.execute("SELECT * FROM students WHERE class = ? AND gender IN (SELECT id FROM gender WHERE gender = ?)", periodx, "Female")
+    female_lst = []
+    for i in range(len(females)):
+        female_lst.append(females[i]["name"])
+
+    # Shuffle lists separately and extend
+    random.shuffle(male_lst)
+    for i in range(len(male_lst)):
+        student_lst.append(male_lst[i])
+    random.shuffle(female_lst)
+    for i in range(len(female_lst)):
+        student_lst.append(female_lst[i])   
+
+    # Make groups    
+    groupnum = int(round(len(student_lst) / 4))
+    groups = partition(student_lst, groupnum)
+
+    return render_template("randomize.html", classname=classname, groups=groups, name=name, period=period, students=students)
+
 @app.route("/group", methods=["GET", "POST"])
 @login_required
 def group():
@@ -247,7 +290,8 @@ def randomize():
 
     # Make random groups
     random.shuffle(student_lst)
-    groups = partition(student_lst, 4)
+    groupnum = int(round(len(student_lst) / 4))
+    groups = partition(student_lst, groupnum)
 
     return render_template("randomize.html", classname=classname, groups=groups, name=name, period=period, students=students)
 
@@ -311,3 +355,20 @@ def restore():
     flash("Class restored.")
     
     return redirect("/classes")
+
+@app.route("/update", methods=["POST"])
+@login_required
+def update():
+    # Update student information
+    period = request.args.get("period")
+    gender = request.form.get("gender")
+    if gender:
+        gendernum = db.execute("SELECT * FROM gender WHERE gender = ?", gender)
+        newgender = gendernum[0]["id"]
+        studentid = request.args.get("studentid")
+        db.execute("UPDATE students SET gender = ? WHERE id = ?", newgender, studentid)
+        flash("Field updated.")
+        return redirect("/edit?period=" + period)
+
+    else:
+        return apology("No gender")

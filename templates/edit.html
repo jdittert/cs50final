@@ -30,16 +30,19 @@
                     <td class="text-start">{{ student.id }}</td>
                     <td class="text-start">{{ student.name }}</td>
                     <td class="text-start">
-                        <select>           
-                            <option disabled selected>Not Set</option>                 
-                            {% for gender in genders %}
-                                {% if gender.id == student.gender %}
-                                    <option selected>{{ gender.gender }}</option>
-                                {% else %}
-                                    <option>{{ gender.gender }}</option>
-                                {% endif %}
-                            {% endfor %}
-                        </select>                        
+                        <form action="/update?studentid={{ student.id }}&period={{ classname }}" method="post">                            
+                            <select name="gender">           
+                                <option disabled selected>Not Set</option>                 
+                                {% for gender in genders %}
+                                    {% if gender.id == student.gender %}
+                                        <option selected>{{ gender.gender }}</option>
+                                    {% else %}
+                                        <option>{{ gender.gender }}</option>
+                                    {% endif %}
+                                {% endfor %}
+                            </select>    
+                            <input type="submit" value="Update"> 
+                        </form>                  
                     </td>     
                     <td class="text-end">
                         <form action="/update?studentid={{ student.id }}" method="post">
