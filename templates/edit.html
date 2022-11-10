@@ -19,8 +19,8 @@
             <tr>
                 <th class="text-start">ID</th>
                 <th class="text-start">Student</th>  
-                <th class="text-start">Gender</th>    
-                <th class="text-end">Update</th> 
+                <th class="text-start">Gender</th>
+                <th class="text-start">Score</th>                  
                 <th class="text-end">Delete</th>                         
             </tr>
         </thead>
@@ -30,7 +30,7 @@
                     <td class="text-start">{{ student.id }}</td>
                     <td class="text-start">{{ student.name }}</td>
                     <td class="text-start">
-                        <form action="/update?studentid={{ student.id }}&period={{ classname }}" method="post">                            
+                        <form action="/update_gender?studentid={{ student.id }}&period={{ classname }}" method="post">                            
                             <select name="gender">           
                                 <option disabled selected>Not Set</option>                 
                                 {% for gender in genders %}
@@ -43,12 +43,13 @@
                             </select>    
                             <input type="submit" value="Update"> 
                         </form>                  
-                    </td>     
-                    <td class="text-end">
-                        <form action="/update?studentid={{ student.id }}" method="post">
-                            <button class="btn, btn-primary" type="submit" id="update{{ student.id }}" name="update{{ student.id }}">Update</button>
-                        </form>
                     </td>
+                    <td class="text-start">
+                        <form action="/update_score?studentid={{ student.id }}&period={{ classname }}" method="post">
+                            <input class="form-control mx-auto w-auto" placeholder="{{ student.score }}" id="score" name="score" type="number">
+                            <input type="submit" value="Update">
+                        </form>
+                    </td>                    
                     <td class="text-end">
                         <form action="/delete?studentid={{ student.id }}&period={{ classname }}" method="post">
                             <button class="btn, btn-primary" type="submit" id="delete{{ student.id }}" name="delete{{ student.id }}">Delete</button>
