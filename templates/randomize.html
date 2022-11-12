@@ -5,20 +5,30 @@
 {% endblock %}
 
 {% block main %}
-    <div>
+    <div class="mb-4">
         <h2>{{ name }}'s {{ period }}</h2>
     </div>    
-    <div class="form-group row">
-        <form action="/randomize?period={{ classname }}" method="post">
-            <button class="btn, btn-primary" type="submit" id="randomize" name="randomize">New Random Groups</button>
-        </form>
-        <form action="/gender_homo?period={{ classname }}" method="post">
-            <button class="btn, btn-primary" type="submit" id="gender_homogeneous" name="gender_homogeneous">Gender - Homogeneous</button>
-        </form>
-        <form action="/gender_hetero?period={{ classname }}" method="post">
-            <button class="btn, btn-primary" type="submit" id="gender_heterogeneous" name="gender_heterogeneous">Gender - Heterogeneous</button>
-        </form>
+    <div class="row g-3 justify-content-center">
+        <div class="col-auto">
+            <p>New Groups:</p>
+        </div>
+        <div class="col-auto">
+            <form action="/randomize?period={{ classname }}" method="post">
+                <button class="btn btn-primary" type="submit" id="randomize" name="randomize">Random</button>
+            </form>
+        </div>
+        <div class="col-auto">
+            <form action="/gender_homo?period={{ classname }}" method="post">
+                <button class="btn btn-primary" type="submit" id="gender_homogeneous" name="gender_homogeneous">Gender - Homogeneous</button>
+            </form>
+        </div>
+        <div class="col-auto">
+            <form action="/gender_hetero?period={{ classname }}" method="post">
+                <button class="btn btn-primary" type="submit" id="gender_heterogeneous" name="gender_heterogeneous">Gender - Heterogeneous</button>
+            </form>
+        </div>
     </div>
+    <div>
     <div>
         {% for group in groups %}
         <div>

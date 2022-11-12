@@ -88,7 +88,9 @@ def add_student():
             return redirect("/classes")
 
     else:
-        return render_template("addstudent.html")
+        classes = db.execute("SELECT class FROM classes WHERE teacher = ?", session["user_id"])
+        genders = db.execute("SELECT gender FROM gender")
+        return render_template("addstudent.html", classes=classes, genders=genders)
 
 @app.route("/archive", methods=["POST"])
 @login_required

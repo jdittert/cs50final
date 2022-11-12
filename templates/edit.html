@@ -5,12 +5,12 @@
 {% endblock %}
 
 {% block main %}
-    <div>
+    <div class="mb-4">
         <h2>{{ name }}'s {{ period }}</h2>
     </div>    
     <div>
         <form action="/randomize?period={{ classname }}" method="post">
-            <button class="btn, btn-primary" type="submit" id="randomize" name="randomize">Create Groups</button>
+            <button class="btn btn-primary" type="submit" id="randomize" name="randomize">Create Groups</button>
         </form>
     </div>
     <div>
@@ -19,8 +19,8 @@
             <tr>
                 <th class="text-start">ID</th>
                 <th class="text-start">Student</th>  
-                <th class="text-start">Gender</th>
-                <th class="text-start">Score</th>                  
+                <th class="text-start col-auto">Gender</th>
+                <th class="text-start col-auto">Score</th>                  
                 <th class="text-end">Delete</th>                         
             </tr>
         </thead>
@@ -46,13 +46,13 @@
                     </td>
                     <td class="text-start">
                         <form action="/update_score?studentid={{ student.id }}&period={{ classname }}" method="post">
-                            <input class="form-control mx-auto w-auto" placeholder="{{ student.score }}" id="score" name="score" type="number">
+                            <input placeholder="{{ student.score }}" id="score" name="score" type="number" min="0" max="100">
                             <input type="submit" value="Update">
                         </form>
                     </td>                    
                     <td class="text-end">
                         <form action="/delete?studentid={{ student.id }}&period={{ classname }}" method="post">
-                            <button class="btn, btn-primary" type="submit" id="delete{{ student.id }}" name="delete{{ student.id }}">Delete</button>
+                            <button class="btn btn-primary" type="submit" id="delete{{ student.id }}" name="delete{{ student.id }}">Delete</button>
                         </form>
                     </td>                                       
                 </tr>
