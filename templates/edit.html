@@ -8,31 +8,46 @@
     <div class="mb-4">
         <h2>{{ name }}'s {{ period }}</h2>
     </div>    
-    <div>
+    <div class="mb-4">
         <form action="/randomize?period={{ classname }}" method="post">
             <button class="btn btn-primary" type="submit" id="randomize" name="randomize">Create Groups</button>
         </form>
     </div>
-    <div>
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th class="text-start">ID</th>
-                <th class="text-start">Student</th>  
-                <th class="text-start col-auto">Gender</th>
-                <th class="text-start col-auto">Score</th>                  
-                <th class="text-end">Delete</th>                         
-            </tr>
-        </thead>
-        <tbody>
-            {% for student in students %}
-                <tr>
-                    <td class="text-start">{{ student.id }}</td>
-                    <td class="text-start">{{ student.name }}</td>
-                    <td class="text-start">
-                        <form action="/update_gender?studentid={{ student.id }}&period={{ classname }}" method="post">                            
-                            <select name="gender">           
-                                <option disabled selected>Not Set</option>                 
+    <div class="container-fluid">
+        {% for student in students %}
+            <form class="row gy-3 mb-2 justify-content-center" action="/update?studentid={{ student.id }}&period={{ classname }}" method="post">
+                <div class="col-auto">
+                    <div class="input-group">
+                        <div class="input-group-text">
+                        <label for="name">Name:</label>
+                        </div>
+                        <input autocomplete="off" autofocus class="form-control mx-auto w-auto" id="name" name="name" value="{{ student.name }}" type="text">   
+                    </div>
+                </div>
+                <div class="col-auto">
+                    <div class="input-group">   
+                        <div class="input-group-text">
+                        <label for="class">Class:</label>
+                        </div>
+                        <select class="form-control mx-auto w-auto" id="class" name="class">
+                            <option disabled selected>Class</option>            
+                            {% for class in classes %} 
+                                {% if class.class == period %}
+                                    <option selected>{{ class.class }}</option>
+                                {% else %}
+                                    <option>{{ class.class }}</option>
+                                {% endif %}
+                            {% endfor %}
+                        </select>            
+                    </div>
+                </div>
+                <div class="col-auto">
+                    <div class="input-group">   
+                        <div class="input-group-text">
+                        <label for="gender">Gender:</label>
+                        </div>
+                        <select class="form-control mx-auto w-auto" id="gender" name="gender">
+                            <option selected>Not Set</option>                 
                                 {% for gender in genders %}
                                     {% if gender.id == student.gender %}
                                         <option selected>{{ gender.gender }}</option>
@@ -40,24 +55,27 @@
                                         <option>{{ gender.gender }}</option>
                                     {% endif %}
                                 {% endfor %}
-                            </select>    
-                            <input type="submit" value="Update"> 
-                        </form>                  
-                    </td>
-                    <td class="text-start">
-                        <form action="/update_score?studentid={{ student.id }}&period={{ classname }}" method="post">
-                            <input placeholder="{{ student.score }}" id="score" name="score" type="number" min="0" max="100">
-                            <input type="submit" value="Update">
-                        </form>
-                    </td>                    
-                    <td class="text-end">
-                        <form action="/delete?studentid={{ student.id }}&period={{ classname }}" method="post">
-                            <button class="btn btn-primary" type="submit" id="delete{{ student.id }}" name="delete{{ student.id }}">Delete</button>
-                        </form>
-                    </td>                                       
-                </tr>
-            {% endfor %}
-        </tbody>        
-    </table>        
-    </div>
+                        </select>
+                    </div>            
+                </div>
+                <div class="col-auto">
+                    <div class="input-group">   
+                        <div class="input-group-text">
+                        <label for="class">Score:</label>
+                        </div>
+                        <input class="form-control mx-auto w-auto" id="score" name="score" placeholder="Score" value="{{ student.score }}" type="number">            
+                    </div>
+                </div>
+                <div class="col-auto">       
+                    <button class="btn btn-primary mx-auto w-auto" type="submit">Update Student</button>
+                </div>
+                <div class="col-auto">
+                    <form action="/delete?studentid={{ student.id }}&period={{ classname }}" method="post">
+                        <button class="btn btn-danger" type="submit" id="delete{{ student.id }}" name="delete{{ student.id }}">Delete</button>
+                    </form>
+                </div> 
+            </form>
+        {% endfor %}        
+    </div>        
+   
 {% endblock %}

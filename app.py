@@ -159,8 +159,9 @@ def edit():
     classname = period_id[0]["class"]                
     students = db.execute("SELECT * FROM students WHERE class = ?", periodx)
     genders = db.execute("SELECT * FROM gender")
+    classes = db.execute("SELECT * FROM classes WHERE teacher = ?", session["user_id"])
     
-    return render_template("edit.html", name=name, period=period, classname=classname, students=students, genders=genders)    
+    return render_template("edit.html", name=name, period=period, classname=classname, students=students, genders=genders, classes=classes)    
 
 @app.route("/gender_hetero", methods=["POST"])
 @login_required
@@ -405,6 +406,12 @@ def restore():
     flash("Class restored.")
     
     return redirect("/classes")
+
+@app.route("/update", methods=["POST"])
+@login_required
+def update():
+    # Update all fields for a given student
+    return apology("TODO", 400)
 
 @app.route("/update_gender", methods=["POST"])
 @login_required
