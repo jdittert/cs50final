@@ -9,6 +9,11 @@
         <h2>{{ name }}'s {{ period }}</h2>
     </div>    
     <div class="mb-4">
+        <p>{{ your_students }}</p>
+        <p>{{ student_lst }}</p>
+        <p>{{ student_id }}</p>
+    </div>
+    <div class="mb-4">
         <form action="/randomize?period={{ classname }}" method="post">
             <button class="btn btn-primary" type="submit" id="randomize" name="randomize">Create Groups</button>
         </form>
@@ -47,7 +52,7 @@
                         <label for="gender">Gender:</label>
                         </div>
                         <select class="form-control mx-auto w-auto" id="gender" name="gender">
-                            <option selected>Not Set</option>                 
+                            <option disabled>Not Set</option>                 
                                 {% for gender in genders %}
                                     {% if gender.id == student.gender %}
                                         <option selected>{{ gender.gender }}</option>

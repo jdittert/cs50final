@@ -411,7 +411,98 @@ def restore():
 @login_required
 def update():
     # Update all fields for a given student
-    return apology("TODO", 400)
+
+    # Get teacher name
+    teacher = db.execute("SELECT * FROM users WHERE id = ?", session["user_id"])
+    name = teacher[0]["usercase"]
+
+    # Get period
+    period = request.args.get("period")
+    period_id = db.execute("SELECT * FROM classes WHERE teacher = ? and class = ?", session["user_id"], period)
+    periodx = period_id[0]["id"]
+    classname = period_id[0]["class"]    
+    genders = db.execute("SELECT * FROM gender")
+    classes = db.execute("SELECT * FROM classes WHERE teacher = ?", session["user_id"])    
+
+    # Get student id
+    student_id = (request.args.get("studentid"))
+    if student_id and student_id.isnumeric():
+        student_id = int(request.args.get("studentid"))
+
+    # Pull teacher's students for a rough server check
+    your_students = db.execute("SELECT id FROM students WHERE teacher = ?", session["user_id"])
+    student_lst = []
+    for i in range(len(your_students)):
+        student_lst.append(int(your_students[i]["id"]))
+    
+    if not student_id:
+        return apology("Select a student", 400)
+
+    elif not student_id in student_lst:
+        return apology("Stop hacking.", 400)   
+
+    # Get information from form
+    new_name = request.form.get("name")
+    new_class = request.form.get("class")
+    new_gender = request.form.get("gender")
+    new_score = request.form.get("score")
+
+    # Validate form information
+    if not new_name:
+        return apology("Student name field left blank", 400)
+    
+    if not new_class:
+        return apology("Class field left blank", 400)
+
+    if new_class:
+        all_classes = db.execute("SELECT * FROM classes WHERE teacher = ?", session["user_id"])
+        class_lst = []
+        for i in range(len(all_classes)):
+            class_lst.append(all_classes[i]["class"])
+        
+        if new_class not in class_lst:
+            return apology("Class not in database", 400)
+        
+        # Transform class into integer
+        for i in range(len(all_classes)):
+            if new_class == all_classes[i]["class"]:
+                new_class = int(all_classes[i]["id"])
+                break
+
+    if new_gender:
+        all_genders = db.execute("SELECT * FROM gender")
+        gender_lst = []
+        for i in range(len(all_genders)):
+            gender_lst.append(all_genders[i]["gender"])
+
+        if new_gender not in gender_lst:
+            return apology("Gender not in database", 400)
+        
+        # Transform gender into integer
+        for i in range(len(all_genders)):
+            if new_gender == all_genders[i]["gender"]:
+                new_gender = int(all_genders[i]["id"])
+                break
+    
+    if new_score:
+        if not new_score.isnumeric():
+            return apology("Score must be integer 0-100", 400)
+        
+        else:
+            new_score = int(new_score)
+    
+    if new_score > 100 or new_score < 0:
+        return apology("Score must be integer 0-100", 400)
+
+    # Update records
+    db.execute("UPDATE students SET (name, class, gender, score) = (?, ?, ?, ?) WHERE id = ?", new_name, new_class, new_gender, new_score, student_id) 
+
+    # Refresh students
+    students = db.execute("SELECT * FROM students WHERE class = ?", periodx)   
+
+    # Flash and redirect
+    flash("Student updated.")       
+    return render_template("edit.html", name=name, period=period, classname=classname, students=students, genders=genders, classes=classes)
 
 @app.route("/update_gender", methods=["POST"])
 @login_required
