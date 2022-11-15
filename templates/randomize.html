@@ -18,6 +18,16 @@
             </form>
         </div>
         <div class="col-auto">
+            <form action="/differentiated?period={{ classname }}" method="post">
+                <button class="btn btn-primary" type="submit" id="differentiated" name="differentiated">Differentiated</button>
+            </form>
+        </div>
+        <div class="col-auto">
+            <form action="/kagan?period={{ classname }}" method="post">
+                <button class="btn btn-primary" type="submit" id="kagan" name="kagan">Kagan</button>
+            </form>
+        </div>
+        <div class="col-auto">
             <form action="/gender_homo?period={{ classname }}" method="post">
                 <button class="btn btn-primary" type="submit" id="gender_homogeneous" name="gender_homogeneous">Gender - Homogeneous</button>
             </form>

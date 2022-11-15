@@ -146,6 +146,31 @@ def delete():
     flash("Student deleted.")
     return redirect("/edit?period=" + period)
 
+@app.route("/differentiated", methods=["POST"])
+@login_required
+def differentiated():
+    # Group students by score
+
+    # Get specific class
+    teacher = db.execute("SELECT * FROM users WHERE id = ?", session["user_id"])
+    name = teacher[0]["usercase"]
+    period = request.args.get("period")
+    classname = period        
+    period_id = db.execute("SELECT * FROM classes WHERE teacher = ? and class = ?", session["user_id"], period)
+    periodx = period_id[0]["id"]  
+
+    # Get student list sorted by score
+    students = db.execute("SELECT * FROM students WHERE class = ? ORDER BY score DESC", periodx)
+    student_lst = []
+    for i in range(len(students)):
+        student_lst.append(students[i]["name"])
+
+    # Group students by score       
+    groupnum = int(round(len(student_lst) / 4))
+    groups = partition(student_lst, groupnum)
+
+    return render_template("randomize.html", classname=classname, groups=groups, name=name, period=period, students=students)
+
 @app.route("/edit", methods=["GET", "POST"])
 @login_required
 def edit():
@@ -274,6 +299,44 @@ def group():
     # User reaches via GET
     else:
         return apology("TODO")       
+
+@app.route("/kagan", methods=["POST"])
+@login_required
+def kagan():
+    # Sort students into kagan groups
+
+    # Get specific class
+    teacher = db.execute("SELECT * FROM users WHERE id = ?", session["user_id"])
+    name = teacher[0]["usercase"]
+    period = request.args.get("period")
+    classname = period        
+    period_id = db.execute("SELECT * FROM classes WHERE teacher = ? and class = ?", session["user_id"], period)
+    periodx = period_id[0]["id"]
+    
+    # Get student list sorted by score
+    students = db.execute("SELECT * FROM students WHERE class = ? ORDER BY score DESC", periodx)
+    student_lst = []
+    for i in range(len(students)):
+        student_lst.append(students[i]["name"])
+
+    # Sort students into differentiated groups, shuffled    
+    diff_groups = partition(student_lst, 4)
+    for group in diff_groups:
+        random.shuffle(group)
+    
+    # Sort students kagan style
+    biggest = (max([len(group) for group in  diff_groups]))
+    final_groups = []
+    for i in range(biggest):
+        for j in range(len(diff_groups)):
+            if i < len(diff_groups[j]):
+                final_groups.append(diff_groups[j][i])            
+
+    # Make groups
+    group_num = int(round(len(final_groups)) / 4)
+    groups = partition(final_groups, group_num)
+
+    return render_template("randomize.html", classname=classname, groups=groups, name=name, period=period, students=students)    
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -502,40 +565,4 @@ def update():
 
     # Flash and redirect
     flash("Student updated.")       
-    return render_template("edit.html", name=name, period=period, classname=classname, students=students, genders=genders, classes=classes)
-
-@app.route("/update_gender", methods=["POST"])
-@login_required
-def update_gender():
-    # Update student information
-    period = request.args.get("period")
-    gender = request.form.get("gender")
-    if gender:
-        gendernum = db.execute("SELECT * FROM gender WHERE gender = ?", gender)
-        newgender = gendernum[0]["id"]
-        studentid = request.args.get("studentid")
-        db.execute("UPDATE students SET gender = ? WHERE id = ?", newgender, studentid)
-        flash("Field updated.")
-        return redirect("/edit?period=" + period)
-
-    else:
-        return apology("No gender")
-
-@app.route("/update_score", methods=["POST"])
-@login_required
-def update_score():
-    # Update student score
-    period = request.args.get("period")
-    
-    # Check for valid score
-    if request.form.get("score") and request.form.get("score").isnumeric():
-        score = int(request.form.get("score"))
-        studentid = request.args.get("studentid")
-        db.execute("UPDATE students SET score = ? WHERE id = ?", score, studentid)
-        flash("Score updated.")
-        return redirect("/edit?period=" + period)
-
-    else:
-        return apology("Score must be an integer")
-
-    
+    return render_template("edit.html", name=name, period=period, classname=classname, students=students, genders=genders, classes=classes)  
