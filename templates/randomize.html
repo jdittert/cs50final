@@ -45,14 +45,28 @@
             <table class="table table-striped">
                 <thead>
                     <tr>                        
-                        <th class="text-start">Group {{ loop.index }}</th>                                
+                        <th class="text-start">Group {{ loop.index }}</th>                                                        
+                    </tr>
+                    <tr>
+                        <th class="text-start">Name</th>
+                        <th class="text-start">Score</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody>                    
                     {% for student in group %}
-                        <tr>
-                            <td class="text-start">{{ student }}</td>                                                                    
+                    {% if student.group or student.group == 0 %}
+                        <tr class="kagan{{ student.group }}">
+                            <td class="text-start">{{ student.name }}</td>
+                            <td class="text-start">{{ student.score }}</td>  
+                            <td class="text=start">{{ student.group }}</td>                                                                  
                         </tr>
+                    {% else %}                    
+                        <tr>
+                            <td class="text-start">{{ student.name }}</td>
+                            <td class="text-start">{{ student.score }}</td>  
+                            <td class="text=start">{{ student.group }}</td>                                                                  
+                        </tr>
+                    {% endif %}
                     {% endfor %}
                 </tbody>        
             </table>        

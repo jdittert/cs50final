@@ -7,7 +7,7 @@ from flask_session import Session
 from tempfile import mkdtemp
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from helpers import apology, login_required, partition
+from helpers import apology, chunk, login_required, partition
 
 # Configure application
 app = Flask(__name__)
@@ -160,14 +160,11 @@ def differentiated():
     periodx = period_id[0]["id"]  
 
     # Get student list sorted by score
-    students = db.execute("SELECT * FROM students WHERE class = ? ORDER BY score DESC", periodx)
-    student_lst = []
-    for i in range(len(students)):
-        student_lst.append(students[i]["name"])
+    students = db.execute("SELECT * FROM students WHERE class = ? ORDER BY score DESC", periodx)    
 
     # Group students by score       
-    groupnum = int(round(len(student_lst) / 4))
-    groups = partition(student_lst, groupnum)
+    groupnum = int(round(len(students) / 4))
+    groups = partition(students, groupnum)
 
     return render_template("randomize.html", classname=classname, groups=groups, name=name, period=period, students=students)
 
@@ -201,40 +198,33 @@ def gender_hetero():
     period_id = db.execute("SELECT * FROM classes WHERE teacher = ? and class = ?", session["user_id"], period)
     periodx = period_id[0]["id"]        
 
-    # Get list of students and turn them into a list           
-    students = db.execute("SELECT * FROM students WHERE class = ?", periodx)
+    # Initialize student list
     student_lst = []
     
     # Get list of male students
     males = db.execute("SELECT * FROM students WHERE class = ? AND gender IN (SELECT id FROM gender WHERE gender = ?)", periodx, "Male")
-    male_lst = []
-    for i in range(len(males)):
-        male_lst.append(males[i]["name"])  
-
+    
     # Get list of female students
     females = db.execute("SELECT * FROM students WHERE class = ? AND gender IN (SELECT id FROM gender WHERE gender = ?)", periodx, "Female")
-    female_lst = []
-    for i in range(len(females)):
-        female_lst.append(females[i]["name"])
-
+    
     # Shuffle lists separately and extend
-    random.shuffle(male_lst)
-    random.shuffle(female_lst)
+    random.shuffle(males)
+    random.shuffle(females)
 
-    ml = len(male_lst)
-    fl = len(female_lst)
+    ml = len(males)
+    fl = len(females)
 
     for i in range(max(ml, fl)):
         if i < ml:
-            student_lst.append(male_lst[i])
+            student_lst.append(males[i])
         if i < fl:
-            student_lst.append(female_lst[i])           
+            student_lst.append(females[i])           
 
     # Make groups    
     groupnum = int(round(len(student_lst) / 4))
     groups = partition(student_lst, groupnum)
 
-    return render_template("randomize.html", classname=classname, groups=groups, name=name, period=period, students=students)
+    return render_template("randomize.html", classname=classname, groups=groups, name=name, period=period)
 
 @app.route("/gender_homo", methods=["POST"])
 @login_required
@@ -249,35 +239,26 @@ def gender_homo():
     period_id = db.execute("SELECT * FROM classes WHERE teacher = ? and class = ?", session["user_id"], period)
     periodx = period_id[0]["id"]        
 
-    # Get list of students and turn them into a list           
-    students = db.execute("SELECT * FROM students WHERE class = ?", periodx)
+    # Set up list of students      
     student_lst = []
     
     # Get list of male students
     males = db.execute("SELECT * FROM students WHERE class = ? AND gender IN (SELECT id FROM gender WHERE gender = ?)", periodx, "Male")
-    male_lst = []
+    random.shuffle(males)    
     for i in range(len(males)):
-        male_lst.append(males[i]["name"])  
+        student_lst.append(males[i])  
 
     # Get list of female students
     females = db.execute("SELECT * FROM students WHERE class = ? AND gender IN (SELECT id FROM gender WHERE gender = ?)", periodx, "Female")
-    female_lst = []
+    random.shuffle(females)
     for i in range(len(females)):
-        female_lst.append(females[i]["name"])
-
-    # Shuffle lists separately and extend
-    random.shuffle(male_lst)
-    for i in range(len(male_lst)):
-        student_lst.append(male_lst[i])
-    random.shuffle(female_lst)
-    for i in range(len(female_lst)):
-        student_lst.append(female_lst[i])   
+        student_lst.append(females[i])       
 
     # Make groups    
     groupnum = int(round(len(student_lst) / 4))
     groups = partition(student_lst, groupnum)
 
-    return render_template("randomize.html", classname=classname, groups=groups, name=name, period=period, students=students)
+    return render_template("randomize.html", classname=classname, groups=groups, name=name, period=period)
 
 @app.route("/group", methods=["GET", "POST"])
 @login_required
@@ -315,12 +296,14 @@ def kagan():
     
     # Get student list sorted by score
     students = db.execute("SELECT * FROM students WHERE class = ? ORDER BY score DESC", periodx)
-    student_lst = []
-    for i in range(len(students)):
-        student_lst.append(students[i]["name"])
+    
 
-    # Sort students into differentiated groups, shuffled    
-    diff_groups = partition(student_lst, 4)
+    # Sort students into differentiated groups, shuffled       
+    diff_groups = partition(students, 4)
+    for group in diff_groups:
+        index = diff_groups.index(group)
+        for student in group:
+            student["group"] = index
     for group in diff_groups:
         random.shuffle(group)
     
@@ -332,9 +315,8 @@ def kagan():
             if i < len(diff_groups[j]):
                 final_groups.append(diff_groups[j][i])            
 
-    # Make groups
-    group_num = int(round(len(final_groups)) / 4)
-    groups = partition(final_groups, group_num)
+    # Make groups    
+    groups = chunk(final_groups, 4)
 
     return render_template("randomize.html", classname=classname, groups=groups, name=name, period=period, students=students)    
 
@@ -397,15 +379,12 @@ def randomize():
     periodx = period_id[0]["id"]     
 
     # Get list of students and turn them into a list           
-    students = db.execute("SELECT * FROM students WHERE class = ?", periodx)
-    student_lst = []
-    for i in range(len(students)):
-        student_lst.append(students[i]["name"])
+    students = db.execute("SELECT * FROM students WHERE class = ?", periodx)    
 
     # Make random groups
-    random.shuffle(student_lst)
-    groupnum = int(round(len(student_lst) / 4))
-    groups = partition(student_lst, groupnum)
+    random.shuffle(students)
+    groupnum = int(round(len(students) / 4))
+    groups = partition(students, groupnum)
 
     return render_template("randomize.html", classname=classname, groups=groups, name=name, period=period, students=students)
 

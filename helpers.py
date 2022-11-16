@@ -35,3 +35,6 @@ def login_required(f):
 def partition(lst, n):
     division = len(lst) / n
     return [lst[round(division * i):round(division * (i + 1))] for i in range(n)]
+
+def chunk(lst, n):
+    return [lst[i * n:(i + 1) * n] for i in range((len(lst) + n - 1) // n )]
