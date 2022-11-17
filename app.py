@@ -57,6 +57,7 @@ def add_class():
     db.execute(
         "INSERT INTO classes (class, subject, teacher) VALUES (?, ?, ?)", request.form.get("class"), request.form.get("subject"), session["user_id"]
         )
+    flash("Class added.")
     return redirect("/classes")
 
 @app.route("/add_student", methods=["GET", "POST"])
@@ -79,13 +80,30 @@ def add_student():
         if not period:
             return apology("Class has not been created yet", 400)
 
+        # Set gender to integer
+        if request.form.get("gender"):
+            gender = db.execute("SELECT id FROM gender WHERE gender = ?", request.form.get("gender"))
+            if not gender:
+                genderx = None
+            else: 
+                genderx = gender[0]["id"]
+        
+        elif not request.form.get("gender"):
+            genderx = None
+
+        # Get score
+        if request.form.get("score"):
+            score = int(request.form.get("score"))
+
+        elif not request.form.get("score"):
+            score = None
+
         # Successfully add student
-        else:
-            flash("Student added!")            
-            db.execute(
-                "INSERT INTO students (name, class, teacher) VALUES (?, ?, ?)", request.form.get("name"), period, session["user_id"]
-            )
-            return redirect("/classes")
+        flash("Student added!")            
+        db.execute(
+            "INSERT INTO students (name, class, teacher, gender, score) VALUES (?, ?, ?, ?, ?)", request.form.get("name"), period, session["user_id"], genderx, score
+        )
+        return redirect("/classes")
 
     else:
         classes = db.execute("SELECT class FROM classes WHERE teacher = ?", session["user_id"])
@@ -160,12 +178,22 @@ def differentiated():
     periodx = period_id[0]["id"]  
 
     # Get student list sorted by score
-    students = db.execute("SELECT * FROM students WHERE class = ? ORDER BY score DESC", periodx)    
+    students = db.execute("SELECT * FROM students WHERE class = ? ORDER BY score DESC", periodx)  
+
+    # Check if class has any students
+    if not students:
+        return apology("No students in class", 400)  
 
     # Group students by score       
     groupnum = int(round(len(students) / 4))
-    groups = partition(students, groupnum)
 
+    # Check for small class size and display groups
+    if groupnum == 0:
+        groups = [students]
+    
+    else:
+        groups = partition(students, groupnum)
+    
     return render_template("randomize.html", classname=classname, groups=groups, name=name, period=period, students=students)
 
 @app.route("/edit", methods=["GET", "POST"])
@@ -206,6 +234,10 @@ def gender_hetero():
     
     # Get list of female students
     females = db.execute("SELECT * FROM students WHERE class = ? AND gender IN (SELECT id FROM gender WHERE gender = ?)", periodx, "Female")
+
+    # Check if class has students
+    if not males and not females:
+        return apology("No students in this class", 400)
     
     # Shuffle lists separately and extend
     random.shuffle(males)
@@ -222,7 +254,13 @@ def gender_hetero():
 
     # Make groups    
     groupnum = int(round(len(student_lst) / 4))
-    groups = partition(student_lst, groupnum)
+    
+    # Check for small class size and display groups
+    if groupnum == 0:
+        groups = [student_lst]
+    
+    else:
+        groups = partition(student_lst, groupnum)
 
     return render_template("randomize.html", classname=classname, groups=groups, name=name, period=period)
 
@@ -254,9 +292,19 @@ def gender_homo():
     for i in range(len(females)):
         student_lst.append(females[i])       
 
+    # Check if class has no students
+    if not student_lst:
+        return apology("No students in this class", 400)
+
     # Make groups    
     groupnum = int(round(len(student_lst) / 4))
-    groups = partition(student_lst, groupnum)
+
+     # Check for small class size and display groups
+    if groupnum == 0:
+        groups = [student_lst]
+    
+    else:
+        groups = partition(student_lst, groupnum)    
 
     return render_template("randomize.html", classname=classname, groups=groups, name=name, period=period)
 
@@ -297,6 +345,9 @@ def kagan():
     # Get student list sorted by score
     students = db.execute("SELECT * FROM students WHERE class = ? ORDER BY score DESC", periodx)
     
+    # Check if class has any students
+    if not students:
+        return apology("No students in class", 400)
 
     # Sort students into differentiated groups, shuffled       
     diff_groups = partition(students, 4)
@@ -381,10 +432,19 @@ def randomize():
     # Get list of students and turn them into a list           
     students = db.execute("SELECT * FROM students WHERE class = ?", periodx)    
 
+    # Check if class has any students
+    if not students:
+        return apology("No students in class", 400)
+    
     # Make random groups
     random.shuffle(students)
     groupnum = int(round(len(students) / 4))
-    groups = partition(students, groupnum)
+    
+    if groupnum == 0:
+        groups = [students]
+    
+    else:
+        groups = partition(students, groupnum)
 
     return render_template("randomize.html", classname=classname, groups=groups, name=name, period=period, students=students)
 

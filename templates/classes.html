@@ -41,7 +41,29 @@
                 </tr>
             {% endfor %}
         </tbody>        
-    </table>    
+    </table>  
+    <div>
+        <h2 class="text-start">Add a new class:</h2>
+        <div>
+        <form action="/add_class" method="post">
+            <div class="row">
+                <div class="form-group col-auto">
+                    <label for="class" hidden>Class</label>
+                    <input autocomplete="off" class="form-control" id="class" name="class" placeholder="Class Name" type="text" aria-describedby="classHelpBlock"> 
+                    <small id="classHelpBlock" class="form-text text-muted">
+                        Your class names must be unique, so consider adding a term or year to the name. <i>(First Hour 2022, for example.)</i></small>  
+                </div>
+                <div class="col-auto">
+                    <label for="subject" hidden>Subject</label>         
+                    <input class="form-control" id="subject" name="subject" placeholder="Subject" type="text">  
+                </div>   
+                <div class="col-auto">
+                    <button class="btn btn-primary" type="submit">Add Class</button> 
+                </div>           
+            </div>            
+        </form>   
+        </div>     
+    </div>  
     <div>
         <p>Archived Classes</p>
     </div>
@@ -69,14 +91,5 @@
             {% endfor %}
         </tbody>        
     </table>    
-    <div>
-        <p>Add a new class:</p>
-        <form action="/add_class" method="post">
-            <div class="mb-3">
-                <input autocomplete="off" class="form-control mx-auto w-auto" id="class" name="class" placeholder="Class Name" type="text">            
-                <input class="form-control mx-auto w-auto" id="subject" name="subject" placeholder="Subject" type="text">
-            </div>
-            <button class="btn btn-primary" type="submit">Add Class</button>
-        </form>        
-    </div>
+    
 {% endblock %}
