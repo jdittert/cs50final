@@ -41,11 +41,11 @@ def index():
 def add_class():
     # Add a class
     # Check for class field
-    if not request.form.get("class"):
+    if not request.form.get("class") or request.form.get("class").isspace():
         return apology("please enter class name", 400)
 
     # Check for subject field
-    if not request.form.get("subject"):
+    if not request.form.get("subject") or request.form.get("subject").isspace():
         return apology("please enter subject", 400)
 
     # Check for unique class name
@@ -63,7 +63,7 @@ def add_class():
 @app.route("/add_student", methods=["GET", "POST"])
 @login_required
 def add_student():
-    # Add students to a class
+    # Add a single student to a class
 
     # If user reaches via POST
     if request.method == "POST":
@@ -109,6 +109,39 @@ def add_student():
         classes = db.execute("SELECT class FROM classes WHERE teacher = ?", session["user_id"])
         genders = db.execute("SELECT gender FROM gender")
         return render_template("addstudent.html", classes=classes, genders=genders)
+
+@app.route("/add_students", methods=["POST"])
+@login_required
+def add_students():
+    # Add multiple students to a class (name and class only)
+
+    # Check for blank fields
+    if not request.form.get("students") or not request.form.get("bclass"):
+        return apology("Enter at least one student and a class", 400)
+
+    if request.form.get("students").isspace() or request.form.get("bclass").isspace():
+        return apology("Enter at least one student and a class", 400)
+
+    # Select for class ID
+    period = db.execute("SELECT id FROM classes WHERE class = ? AND teacher = ?", request.form.get("bclass"), session["user_id"])
+    
+    # If class ID does not exist
+    if not period:
+        return apology("Class has not been created yet", 400)
+    
+    period = int(period[0]["id"])
+
+    # Break textarea into single students
+    new_students = request.form.get("students").splitlines()
+
+    # Add students to database
+    for student in new_students:
+        db.execute("INSERT INTO students (name, class, teacher) VALUES (?, ?, ?)",
+        student, period, session["user_id"])
+
+    # Flash and redirect
+    flash("Students added!")
+    return redirect("/classes")
 
 @app.route("/archive", methods=["POST"])
 @login_required
@@ -550,7 +583,7 @@ def update():
     new_score = request.form.get("score")
 
     # Validate form information
-    if not new_name:
+    if not new_name or new_name.isspace():
         return apology("Student name field left blank", 400)
     
     if not new_class:
@@ -575,26 +608,30 @@ def update():
         all_genders = db.execute("SELECT * FROM gender")
         gender_lst = []
         for i in range(len(all_genders)):
-            gender_lst.append(all_genders[i]["gender"])
+            gender_lst.append(all_genders[i]["gender"])        
 
         if new_gender not in gender_lst:
-            return apology("Gender not in database", 400)
+            new_gender = None
         
         # Transform gender into integer
-        for i in range(len(all_genders)):
-            if new_gender == all_genders[i]["gender"]:
-                new_gender = int(all_genders[i]["id"])
-                break
+        else:
+            for i in range(len(all_genders)):
+                if new_gender == all_genders[i]["gender"]:
+                    new_gender = int(all_genders[i]["id"])
+                    break
     
     if new_score:
         if not new_score.isnumeric():
             return apology("Score must be integer 0-100", 400)
         
+        elif new_score > 100 or new_score < 0:
+            return apology("Score must be integer 0-100", 400)
+        
         else:
             new_score = int(new_score)
     
-    if new_score > 100 or new_score < 0:
-        return apology("Score must be integer 0-100", 400)
+    if not new_score:
+        new_score = None   
 
     # Update records
     db.execute("UPDATE students SET (name, class, gender, score) = (?, ?, ?, ?) WHERE id = ?", new_name, new_class, new_gender, new_score, student_id) 

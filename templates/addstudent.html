@@ -6,55 +6,94 @@
 
 {% block main %}
     <div class="mb-3">
-        <h2>Add a Student</h2>
+        <h2>Add a Single Student</h2>
     </div>
     <div class="container-fluid">
         <form class="row gy-2 gx-3 justify-content-center" action="/add_student" method="post">
             <div class="col-auto">
-                <div class="input-group">
-                    <div class="input-group-text">
-                    <label for="name">Name:</label>
+                <div class="form-group text-start"> 
+                    <div class="input-group">
+                        <div class="input-group-text">                   
+                            <label for="name">Name:</label> 
+                        </div>                                     
+                            <input autocomplete="off" class="form-control mx-auto w-auto" id="name" name="name" placeholder="Name" type="text" aria-describedby="nameHelpBlock">                        
                     </div>
-                    <input autocomplete="off" autofocus class="form-control mx-auto w-auto" id="name" name="name" placeholder="Name" type="text">   
+                    <small id="nameHelpBlock" class="form-text text-muted">Required</small>                       
                 </div>
             </div>
             <div class="col-auto">
-                <div class="input-group">   
-                    <div class="input-group-text">
-                    <label for="class">Class:</label>
+                <div class="form-group text-start">
+                    <div class="input-group">
+                        <div class="input-group-text">                  
+                        <label for="class">Class:</label>
+                        </div>                 
+                        <select class="form-control mx-auto w-auto" id="class" name="class" aria-describedby="classHelpBlock">
+                            <option disabled selected>Class</option>            
+                            {% for class in classes %} 
+                                <option>{{ class.class }}</option>
+                            {% endfor %}
+                        </select>
                     </div>
-                    <select class="form-control mx-auto w-auto" id="class" name="class">
-                        <option disabled selected>Class</option>            
-                        {% for class in classes %} 
-                            <option>{{ class.class }}</option>
-                        {% endfor %}
-                    </select>            
+                    <small id="classHelpBlock" class="form-text text-muted">Required</small>                    
                 </div>
             </div>
             <div class="col-auto">
-                <div class="input-group">   
-                    <div class="input-group-text">
-                    <label for="gender">Gender:</label>
+                <div class="form-group text-start">
+                    <div class="input-group">
+                        <div class="input-group-text">              
+                        <label for="gender">Gender:</label>
+                        </div>                  
+                        <select class="form-control mx-auto w-auto" id="gender" name="gender" aria-describedby="genderHelpBlock">
+                            <option disabled selected>Gender</option>            
+                            {% for gender in genders %} 
+                                <option>{{ gender.gender }}</option>
+                            {% endfor %}
+                        </select>
                     </div>
-                    <select class="form-control mx-auto w-auto" id="gender" name="gender">
-                        <option disabled selected>Gender</option>            
-                        {% for gender in genders %} 
-                            <option>{{ gender.gender }}</option>
-                        {% endfor %}
-                    </select>
+                    <small id="genderHelpBlock" class="form-text text-muted">Optional</small>
                 </div>            
             </div>
             <div class="col-auto">
-                <div class="input-group">   
-                    <div class="input-group-text">
-                    <label for="class">Score:</label>
+                <div class="form-group text-start">
+                    <div class="input-group">
+                        <div class="input-group-text">                    
+                        <label for="class">Score:</label>
+                        </div>                   
+                        <input class="form-control mx-auto w-auto" id="score" name="score" placeholder="Score" type="number" aria-describedby="scoreHelpBlock">
                     </div>
-                    <input class="form-control mx-auto w-auto" id="score" name="score" placeholder="Score" type="number">            
+                        <small id="scoreHelpBlock" class="form-text text-muted">Optional</small>                             
                 </div>
             </div>
             <div class="row gy-3">       
                 <button class="btn btn-primary mx-auto w-auto" type="submit">Add Student</button>
             </div> 
         </form>
+    </div>
+    <div class="mb-3">
+        <h2>Add Multiple Students</h2>
+        <h3>Enter student names, placing each student on a new line.</h3>
+    </div>
+    <div class="container-fluid">
+        <form action="/add_students" class="justify-content-center" method="post">
+            <div class="input-group form-control">
+                <label for="students">Student Names</label>
+                <textarea autocomplete="off" class="form-control mx-auto w-auto" id="students" name="students" placeholder="Student Names" type="text"></textarea>
+            </div>
+            <div class="input-group form-control">   
+                <div class="input-group-text">
+                <label for="bclass">Class:</label>
+                </div>
+                <select class="form-control mx-auto w-auto" id="bclass" name="bclass">
+                    <option disabled selected>Class</option>            
+                    {% for class in classes %} 
+                        <option>{{ class.class }}</option>
+                    {% endfor %}
+                </select>            
+            </div> 
+            <div>
+                <button class="btn btn-primary mx-auto w-auto" type="submit">Add Students</button>
+            </div>           
+        </form>
+    </div>
     </div>
 {% endblock %}
