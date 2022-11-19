@@ -268,8 +268,11 @@ def gender_hetero():
     # Get list of female students
     females = db.execute("SELECT * FROM students WHERE class = ? AND gender IN (SELECT id FROM gender WHERE gender = ?)", periodx, "Female")
 
+    # Get list of students without gender
+    blanks = db.execute("SELECT * FROM students WHERE class = ? AND gender IS NULL", periodx)  
+
     # Check if class has students
-    if not males and not females:
+    if not males and not females and not blanks:
         return apology("No students in this class", 400)
     
     # Shuffle lists separately and extend
@@ -295,7 +298,7 @@ def gender_hetero():
     else:
         groups = partition(student_lst, groupnum)
 
-    return render_template("randomize.html", classname=classname, groups=groups, name=name, period=period)
+    return render_template("randomize.html", classname=classname, groups=groups, name=name, period=period, blanks=blanks)
 
 @app.route("/gender_homo", methods=["POST"])
 @login_required
@@ -323,10 +326,13 @@ def gender_homo():
     females = db.execute("SELECT * FROM students WHERE class = ? AND gender IN (SELECT id FROM gender WHERE gender = ?)", periodx, "Female")
     random.shuffle(females)
     for i in range(len(females)):
-        student_lst.append(females[i])       
+        student_lst.append(females[i])
+
+    # Get list of students without gender
+    blanks = db.execute("SELECT * FROM students WHERE class = ? AND gender IS NULL", periodx)  
 
     # Check if class has no students
-    if not student_lst:
+    if not student_lst and not blanks:
         return apology("No students in this class", 400)
 
     # Make groups    
@@ -339,7 +345,7 @@ def gender_homo():
     else:
         groups = partition(student_lst, groupnum)    
 
-    return render_template("randomize.html", classname=classname, groups=groups, name=name, period=period)
+    return render_template("randomize.html", classname=classname, groups=groups, name=name, period=period, blanks=blanks)
 
 @app.route("/group", methods=["GET", "POST"])
 @login_required

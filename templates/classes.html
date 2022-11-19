@@ -5,14 +5,15 @@
 {% endblock %}
 
 {% block main %}
-    <div>
+    <div class="d-flex justify-content-start">
         <p>{{ message }}, {{ name }}!</p>
-    </div>    
+    </div>
+    <div class="d-flex">
     <table class="table table-striped">
         <thead>
             <tr>
                 <th class="text-start">Class</th>
-                <th class="text-start">Subject</th>
+                <th class="text-start d-none d-sm-table-cell">Subject</th>
                 <th class="text-end">Make Groups</th>
                 <th class="text-end">Edit</th> 
                 <th class="text-end">Archive</th>               
@@ -22,15 +23,15 @@
             {% for class in classes %}
                 <tr>
                     <td class="text-start">{{ class.class }}</td>
-                    <td class="text-start">{{ class.subject }}</td>
+                    <td class="text-start d-none d-sm-table-cell">{{ class.subject }}</td>
                     <td class="text-end">
                         <form action="/group?period={{ class.class }}" method="post">
-                            <button class="btn btn-primary" type="submit" id="{{ class.class }}" name="{{ class.class}}">Group Class</button>
+                            <button class="btn btn-primary" type="submit" id="{{ class.class }}" name="{{ class.class}}">Group</button>
                         </form>
                     </td>
                     <td class="text-end">
                         <form action="/edit?period={{ class.class }}" method="post">
-                            <button class="btn btn-primary" type="submit" id="edit{{ class.class }}" name="edit{{ class.class }}">Edit Class</td>     
+                            <button class="btn btn-primary" type="submit" id="edit{{ class.class }}" name="edit{{ class.class }}">Edit</td>     
                         </form>
                     </td>
                     <td class="text-end">
@@ -41,8 +42,9 @@
                 </tr>
             {% endfor %}
         </tbody>        
-    </table>  
-    <div>
+    </table>
+    </div>
+    <div class="mb-4">
         <h2 class="text-start">Add a new class:</h2>
         <div>
         <form action="/add_class" method="post">
@@ -64,14 +66,15 @@
         </form>   
         </div>     
     </div>  
-    <div>
-        <p>Archived Classes</p>
+    <div class="d-flex justify-content-start">
+        <button href="#archivedClasses" class="btn btn-primary" data-bs-toggle="collapse" aria-expanded="false" aria-controls="archivedClasses">Show Archived Classes</button>
     </div>
+    <div id="archivedClasses" class="collapse">
     <table class="table table-striped">
         <thead>
             <tr>
                 <th class="text-start">Class</th>
-                <th class="text-start">Subject</th>   
+                <th class="text-start d-none d-sm-block">Subject</th>   
                 <th class="text-end">Make Groups</th>   
                 <th class="text-end">Edit</th>          
                 <th class="text-end">Restore</th>               
@@ -81,7 +84,7 @@
             {% for class in archived %}
                 <tr>
                     <td class="text-start">{{ class.class }}</td>
-                    <td class="text-start" colspan="3">{{ class.subject }}</td>                    
+                    <td class="text-start d-none d-sm-block" colspan="3">{{ class.subject }}</td>                    
                     <td class="text-end">
                         <form action="/restore?period={{ class.class }}" method="post">
                             <button class="btn btn-primary" type="submit" id="restore{{ class.class }}" name="restore{{ class.class }}">Restore</td>     
@@ -90,6 +93,7 @@
                 </tr>
             {% endfor %}
         </tbody>        
-    </table>    
+    </table>
+    </div>   
     
 {% endblock %}

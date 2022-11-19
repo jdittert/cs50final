@@ -71,6 +71,24 @@
                 </tbody>        
             </table>        
         </div>
-        {% endfor %}    
+        {% endfor %}
+        <div>
+            {% if blanks %}
+            <table class="table table-striped">
+                <thead>
+                    <th class="text-start">
+                        The following students have no gender assigned:
+                    </th>
+                </thead>
+                <tbody>
+                    {% for student in blanks %}
+                    <tr>
+                        <td class="text-start">{{ student.name }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% endif %}            
+        </div>           
     </div>
 {% endblock %}
