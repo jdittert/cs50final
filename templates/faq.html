@@ -1,0 +1,24 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    FAQ
+{% endblock %}
+
+{% block main %}
+    <div class="mb-4 text-start">
+        <h2>Frequently Asked Questions:</h2>
+    </div>
+    <div class="text-start">
+        <p><b>Q:</b> I clicked "create new groups" but the groups didn't change. Is something broken?</p>
+        <p><b>A:</b> Possibly, though the more likely scenario is there is only one way to randomize the students based on your criteria. 
+            For example, selecting "differentiated" will always return the same groups, since students are sorted purely by score.</p>
+    </div>
+    <div class="text-start">
+        <p><b>Q:</b> Did you know gender is a spectrum and not confined to simply "male" and "female"?</p>
+        <p><b>A:</b> Yes, but including a spectrum of genders is beyond my coding skill. Use your best judgement.</p>
+    </div>
+    <div class="text-start">
+        <p><b>Q:</b> Can I edit gender and score for multiple students at once?</p>
+        <p><b>A:</b> Not at this time.</p>
+    </div>
+{% endblock %}

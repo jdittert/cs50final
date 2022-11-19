@@ -173,7 +173,17 @@ def classes():
         "SELECT * FROM classes WHERE teacher = ? AND archived = ?", session["user_id"], "no"
     )
 
+    for elem in classes:
+        counts = db.execute("SELECT COUNT(*) FROM students WHERE class IN (SELECT id FROM classes WHERE class = ?)", elem["class"])
+        count = (counts[0]["COUNT(*)"])
+        elem["count"] = count
+
     archived = db.execute("SELECT * FROM classes WHERE teacher = ? AND archived = ?", session["user_id"], "yes")
+
+    for elem in archived:
+        counts = db.execute("SELECT COUNT(*) FROM students WHERE class IN (SELECT id FROM classes WHERE class = ?)", elem["class"])
+        count = (counts[0]["COUNT(*)"])
+        elem["count"] = count
 
     # If there are no classes
     if not classes:
@@ -245,6 +255,12 @@ def edit():
     classes = db.execute("SELECT * FROM classes WHERE teacher = ?", session["user_id"])
     
     return render_template("edit.html", name=name, period=period, classname=classname, students=students, genders=genders, classes=classes)    
+
+@app.route("/faq")
+def faq():
+    # Present a text based frequently asked questions page
+
+    return render_template("faq.html")
 
 @app.route("/gender_hetero", methods=["POST"])
 @login_required
