@@ -8,7 +8,7 @@
     <div class="mb-4">
         <h2>{{ name }}'s {{ period }}</h2>
     </div>    
-    <div class="row g-3 justify-content-center">
+    <div class="row mb-3">
         <div class="col-auto">
             <p>New Groups:</p>
         </div>
@@ -37,58 +37,20 @@
                 <button class="btn btn-primary" type="submit" id="gender_heterogeneous" name="gender_heterogeneous">Gender - Heterogeneous</button>
             </form>
         </div>
-    </div>
-    <div>
-    <div>
+    </div>          
+    <div class="d-sm-flex flex-wrap">
         {% for group in groups %}
-        <div>
-            <table class="table table-striped">
-                <thead>
-                    <tr>                        
-                        <th class="text-start">Group {{ loop.index }}</th>                                                        
-                    </tr>
-                    <tr>
-                        <th class="text-start">Name</th>
-                        <th class="text-start">Score</th>
-                    </tr>
-                </thead>
-                <tbody>                    
-                    {% for student in group %}
-                    {% if student.group or student.group == 0 %}
-                        <tr class="kagan{{ student.group }}">
-                            <td class="text-start">{{ student.name }}</td>
-                            <td class="text-start">{{ student.score }}</td>  
-                            <td class="text=start">{{ student.group }}</td>                                                                  
-                        </tr>
-                    {% else %}                    
-                        <tr>
-                            <td class="text-start">{{ student.name }}</td>
-                            <td class="text-start">{{ student.score }}</td>  
-                            <td class="text=start">{{ student.group }}</td>                                                                  
-                        </tr>
-                    {% endif %}
-                    {% endfor %}
-                </tbody>        
-            </table>        
+        <div class="card flex-fill">
+            <div class="card-header fw-bold">                
+                Group {{ loop.index }}
+            </div>
+            <ul class="list-group list-group-flush">
+                {% for student in group %}
+                <li class="list-group-item justify-content-start">{{ student.name }}</li>
+                {% endfor %}
+            </ul>
         </div>
         {% endfor %}
-        <div>
-            {% if blanks %}
-            <table class="table table-striped">
-                <thead>
-                    <th class="text-start">
-                        The following students have no gender assigned:
-                    </th>
-                </thead>
-                <tbody>
-                    {% for student in blanks %}
-                    <tr>
-                        <td class="text-start">{{ student.name }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-            {% endif %}            
-        </div>           
-    </div>
+    </div>     
+            
 {% endblock %}
