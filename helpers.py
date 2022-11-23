@@ -1,9 +1,11 @@
 import os
 import requests
 import urllib.parse
+import random
 
 from flask import redirect, render_template, request, session
 from functools import wraps
+
 
 def apology(message, code=400):
     """Render message as an apology to user."""
@@ -38,3 +40,15 @@ def partition(lst, n):
 
 def chunk(lst, n):
     return [lst[i * n:(i + 1) * n] for i in range((len(lst) + n - 1) // n )]
+
+def random_groups(lst, size):
+    random.shuffle(lst)
+    groupnum = int(round(len(lst) / size))
+
+    if groupnum == 0:
+        groups = [lst]
+
+    else:
+        groups = partition(lst, groupnum)
+
+    return groups

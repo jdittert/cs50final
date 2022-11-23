@@ -41,7 +41,7 @@
     <div class="d-sm-flex flex-wrap">
         {% for group in groups %}
         <div class="card flex-fill">
-            <div class="card-header fw-bold">                
+            <div class="card-header fw-bold text-white {{ loop.cycle('bg-primary bg-gradient' , 'bg-secondary bg-gradient') }}">                
                 Group {{ loop.index }}
             </div>
             <ul class="list-group list-group-flush">

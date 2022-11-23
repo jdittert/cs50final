@@ -7,7 +7,7 @@ from flask_session import Session
 from tempfile import mkdtemp
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from helpers import apology, chunk, login_required, partition
+from helpers import apology, chunk, login_required, partition, random_groups
 
 # Configure application
 app = Flask(__name__)
@@ -382,7 +382,73 @@ def group():
 
     # User reaches via GET
     else:
-        return apology("TODO")       
+        return apology("TODO") 
+
+@app.route("/grouped", methods=["GET", "POST"])
+@login_required
+def grouped():
+
+    # User reaches via POST
+    if request.method == "POST":
+        teacher = db.execute("SELECT * FROM users WHERE id = ?", session["user_id"])
+        name = teacher[0]["usercase"]
+        period = request.args.get("period")        
+        period_id = db.execute("SELECT * FROM classes WHERE teacher = ? and class = ?", session["user_id"], period)
+        periodx = period_id[0]["id"]
+        classname = period_id[0]["class"]                
+        students = db.execute("SELECT * FROM students WHERE class = ?", periodx)
+        size = request.form.get("groupsize")
+        method = request.form.get("method")
+
+        # Check if class has any students
+        if not students:
+            return apology("No students in class", 400)
+        
+        # Check for class size
+        if not size or not size.isnumeric():
+            return apology("Invalid students per group", 400)
+
+        # Class size to int and check
+        size = int(size)
+        if not size > 0 or size > len(students):
+            return apology("invalid students per group", 400)
+
+        # Check group method
+        if not method or method.isspace():
+            return apology("select grouping method", 400)
+
+        if method == "Random": 
+            # Make random groups
+            groups = random_groups(students, size)
+
+            return render_template("randomize.html", classname=classname, groups=groups, name=name, period=period, students=students)
+        
+        else:
+            return apology("todo", 400)
+    
+    else:
+        return redirect("/classes")
+
+@app.route("/grouptest", methods=["GET", "POST"])
+@login_required
+def grouptest():
+    # Group students
+
+    # User reaches via POST
+    if request.method == "POST":
+        teacher = db.execute("SELECT * FROM users WHERE id = ?", session["user_id"])
+        name = teacher[0]["usercase"]
+        period = request.args.get("period")        
+        period_id = db.execute("SELECT * FROM classes WHERE teacher = ? and class = ?", session["user_id"], period)
+        periodx = period_id[0]["id"]
+        classname = period_id[0]["class"]                
+        students = db.execute("SELECT * FROM students WHERE class = ?", periodx)
+      
+        return render_template("group-test.html", name=name, period=period, classname=classname, students=students)
+
+    # User reaches via GET
+    else:
+        return apology("TODO")      
 
 @app.route("/kagan", methods=["POST"])
 @login_required
@@ -484,7 +550,7 @@ def randomize():
     period_id = db.execute("SELECT * FROM classes WHERE teacher = ? and class = ?", session["user_id"], period)
     periodx = period_id[0]["id"]     
 
-    # Get list of students and turn them into a list           
+    # Get list of students          
     students = db.execute("SELECT * FROM students WHERE class = ?", periodx)    
 
     # Check if class has any students
