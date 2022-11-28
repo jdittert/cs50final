@@ -15,8 +15,9 @@
                     <div class="input-group-text">
                         <label for="groupsize">Students Per Group:</label>
                     </div>
-                    <input autocomplete="off" class="form-control" id="groupsize" name="groupsize" placeholder="Group Size" type="text">
-                </div>                
+                    <input autocomplete="off" class="form-control" id="groupsize" name="groupsize" placeholder="Group Size" type="text" aria-describedby="groupsizeHelpBlock">
+                </div>  
+                <small id="groupsizeHelpBlock" class="form-text text-muted">Note: Kagan group size defaults to 4.</small>              
             </div>            
             <div class="col-auto">               
                 <div class="input-group">
@@ -24,8 +25,9 @@
                         <label for="method">Grouping Method</label>
                     </div>
                     <select autocomplete="off" class="form-control" id="method" name="method">
-                        <option>Random</option>
-                        <option>To Do</option>
+                        {% for method in methods %}
+                        <option value="{{ method }}">{{ method }}</option>
+                        {% endfor %}
                     </select>
                 </div>                                             
             </div>
