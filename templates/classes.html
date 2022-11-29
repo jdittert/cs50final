@@ -9,47 +9,33 @@
         <p>{{ message }}, {{ name }}!</p>
     </div>
     <div class="d-flex">
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th class="text-start">Class</th>
-                <th class="text-start d-none d-sm-table-cell">Subject</th>
-                <th class="text-end">Group Test</th>
-                <th class="text-end">Make Groups</th>
-                <th class="text-end">Edit</th> 
-                <th class="text-end">Archive</th>               
-            </tr>
-        </thead>
-        <tbody>
-            {% for class in classes %}
-                <tr>
-                    <td class="text-start">{{ class.class }} ({{ class.count }})</td>
-                    <td class="text-start d-none d-sm-table-cell">{{ class.subject }}</td>
-                    <td class="text-end">
-                        <form action="/grouptest?period={{ class.class }}" method="post">
-                            <button class="btn btn-primary" type="submit" id="{{ class.class }}" name="{{ class.class}}">Group Test</button>
-                        </form>
-                    </td>
-                    <td class="text-end">
-                        <form action="/group?period={{ class.class }}" method="post">
-                            <button class="btn btn-primary" type="submit" id="{{ class.class }}" name="{{ class.class}}">Group</button>
-                        </form>
-                    </td>
-                    <td class="text-end">
-                        <form action="/edit?period={{ class.class }}" method="post">
-                            <button class="btn btn-primary" type="submit" id="edit{{ class.class }}" name="edit{{ class.class }}">Edit</td>     
-                        </form>
-                    </td>
-                    <td class="text-end">
-                        <form action="/archive?period={{ class.class }}" method="post">
-                            <button class="btn btn-primary" type="submit" id="archive{{ class.class }}" name="archive{{ class.class }}">Archive</td>     
-                        </form>
-                    </td>                      
-                </tr>
-            {% endfor %}
-        </tbody>        
-    </table>
+        <p class="fw-bold">Active Classes</p>
     </div>
+    <div>        
+        {% for class in classes %}        
+        <div class="row row-cols-auto mb-3 p-2 {{ loop.cycle('bg-light' , 'bg-white') }} align-items-center justify-content-between">    
+            <div class="col-12 col-lg-9 mb-2">
+                <p>{{ class.class }}  <span class="badge bg-primary ms-2" >{{ class.count }}</span></p>
+                <small class="text-muted mt-n1">{{ class.subject }}</small>
+            </div>
+            <div class="col-lg-1 text-start">
+                <form action="/group?period={{ class.class }}" method="post">
+                    <button class="btn btn-primary" type="submit" id="{{ class.class }}" name="{{ class.class}}">Group</button>
+                </form>
+            </div>
+            <div class="col-lg-1 text-center">
+                <form action="/edit?period={{ class.class }}" method="post">
+                    <button class="btn btn-primary" type="submit" id="edit{{ class.class }}" name="edit{{ class.class }}">Edit</button>     
+                </form>
+            </div>
+            <div class="col-lg-1 text-end">
+                <form action="/archive?period={{ class.class }}" method="post">
+                    <button class="btn btn-primary" type="submit" id="archive{{ class.class }}" name="archive{{ class.class }}">Archive</button>
+            </div>              
+        </div>      
+        {% endfor %}        
+    </div>
+    
     <div class="mb-4">
         <h2 class="text-start">Add a new class:</h2>
         <div>

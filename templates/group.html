@@ -1,42 +1,40 @@
 {% extends "layout.html" %}
 
 {% block title %}
-    Group
+    Group Test
 {% endblock %}
 
 {% block main %}
     <div class="mb-3">
         <h2>{{ name }}'s {{ period }}</h2>
     </div>    
-    <div class="row g-3 justify-content-center">
-        <div class="col-auto">
-            <p>Group by:</p>
-        </div>
-        <div class="col-auto">
-            <form action="/randomize?period={{ classname }}" method="post">
-                <button class="btn btn-primary" type="submit" id="randomize" name="randomize">Random</button>
-            </form>
-        </div>
-        <div class="col-auto">
-            <form action="/differentiated?period={{ classname }}" method="post">
-                <button class="btn btn-primary" type="submit" id="differentiated" name="differentiated">Differentiated</button>
-            </form>
-        </div>
-        <div class="col-auto">
-            <form action="/kagan?period={{ classname }}" method="post">
-                <button class="btn btn-primary" type="submit" id="kagan" name="kagan">Kagan</button>
-            </form>
-        </div>
-        <div class="col-auto">
-            <form action="/gender_homo?period={{ classname }}" method="post">
-                <button class="btn btn-primary" type="submit" id="gender_homogeneous" name="gender_homogeneous">Gender - Homogeneous</button>
-            </form>
-        </div>
-        <div class="col-auto">
-            <form action="/gender_hetero?period={{ classname }}" method="post">
-                <button class="btn btn-primary" type="submit" id="gender_heterogeneous" name="gender_heterogeneous">Gender - Heterogeneous</button>
-            </form>
-        </div>
+    <div>
+        <form action="/grouped?period={{ classname }}" class="row justify-content-start" method="post">
+            <div class="col-auto">                
+                <div class="input-group">
+                    <div class="input-group-text">
+                        <label for="groupsize">Students Per Group:</label>
+                    </div>
+                    <input autocomplete="off" class="form-control" id="groupsize" name="groupsize" placeholder="Group Size" type="text" aria-describedby="groupsizeHelpBlock">
+                </div>  
+                <small id="groupsizeHelpBlock" class="form-text text-muted">Note: Kagan group size defaults to 4.</small>              
+            </div>            
+            <div class="col-auto">               
+                <div class="input-group">
+                    <div class="input-group-text">
+                        <label for="method">Grouping Method</label>
+                    </div>
+                    <select autocomplete="off" class="form-control" id="method" name="method">
+                        {% for method in methods %}
+                        <option value="{{ method }}">{{ method }}</option>
+                        {% endfor %}
+                    </select>
+                </div>                                             
+            </div>
+            <div class="col-auto">
+                <button class="btn btn-primary" type="submit">Make Groups</button>
+            </div>
+        </form>
     </div>
     <div>
     <table class="table table-striped">
@@ -56,6 +54,7 @@
                 </tr>
             {% endfor %}
         </tbody>        
-    </table>        
-    </div>
+    </table> 
+    </div>   
+    
 {% endblock %}

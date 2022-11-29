@@ -30,7 +30,6 @@ methods = [
     "Kagan",
     "Gender - Heterogeneous",
     "Gender - Homogeneous",
-    "To Do"
 ]
 
 @app.after_request
@@ -217,38 +216,6 @@ def delete():
     flash("Student deleted.")
     return redirect("/edit?period=" + period)
 
-@app.route("/differentiated", methods=["POST"])
-@login_required
-def differentiated():
-    # Group students by score
-
-    # Get specific class
-    teacher = db.execute("SELECT * FROM users WHERE id = ?", session["user_id"])
-    name = teacher[0]["usercase"]
-    period = request.args.get("period")
-    classname = period        
-    period_id = db.execute("SELECT * FROM classes WHERE teacher = ? and class = ?", session["user_id"], period)
-    periodx = period_id[0]["id"]  
-
-    # Get student list sorted by score
-    students = db.execute("SELECT * FROM students WHERE class = ? ORDER BY score DESC", periodx)  
-
-    # Check if class has any students
-    if not students:
-        return apology("No students in class", 400)  
-
-    # Group students by score       
-    groupnum = int(round(len(students) / 4))
-
-    # Check for small class size and display groups
-    if groupnum == 0:
-        groups = [students]
-    
-    else:
-        groups = partition(students, groupnum)
-    
-    return render_template("randomize.html", classname=classname, groups=groups, name=name, period=period, students=students)
-
 @app.route("/edit", methods=["GET", "POST"])
 @login_required
 def edit():
@@ -272,106 +239,6 @@ def faq():
 
     return render_template("faq.html")
 
-@app.route("/gender_hetero", methods=["POST"])
-@login_required
-def gender_hetero():
-    # Create random groups heterogeneous by gender
-
-    # Get specific class       
-    teacher = db.execute("SELECT * FROM users WHERE id = ?", session["user_id"])
-    name = teacher[0]["usercase"]
-    period = request.args.get("period")
-    classname = period        
-    period_id = db.execute("SELECT * FROM classes WHERE teacher = ? and class = ?", session["user_id"], period)
-    periodx = period_id[0]["id"]        
-
-    # Initialize student list
-    student_lst = []
-    
-    # Get list of male students
-    males = db.execute("SELECT * FROM students WHERE class = ? AND gender IN (SELECT id FROM gender WHERE gender = ?)", periodx, "Male")
-    
-    # Get list of female students
-    females = db.execute("SELECT * FROM students WHERE class = ? AND gender IN (SELECT id FROM gender WHERE gender = ?)", periodx, "Female")
-
-    # Get list of students without gender
-    blanks = db.execute("SELECT * FROM students WHERE class = ? AND gender IS NULL", periodx)  
-
-    # Check if class has students
-    if not males and not females and not blanks:
-        return apology("No students in this class", 400)
-    
-    # Shuffle lists separately and extend
-    random.shuffle(males)
-    random.shuffle(females)
-
-    ml = len(males)
-    fl = len(females)
-
-    for i in range(max(ml, fl)):
-        if i < ml:
-            student_lst.append(males[i])
-        if i < fl:
-            student_lst.append(females[i])           
-
-    # Make groups    
-    groupnum = int(round(len(student_lst) / 4))
-    
-    # Check for small class size and display groups
-    if groupnum == 0:
-        groups = [student_lst]
-    
-    else:
-        groups = partition(student_lst, groupnum)
-
-    return render_template("randomize.html", classname=classname, groups=groups, name=name, period=period, blanks=blanks)
-
-@app.route("/gender_homo", methods=["POST"])
-@login_required
-def gender_homo():
-    # Create random groups homogeneous by gender
-    
-    # Get specific class       
-    teacher = db.execute("SELECT * FROM users WHERE id = ?", session["user_id"])
-    name = teacher[0]["usercase"]
-    period = request.args.get("period")
-    classname = period        
-    period_id = db.execute("SELECT * FROM classes WHERE teacher = ? and class = ?", session["user_id"], period)
-    periodx = period_id[0]["id"]        
-
-    # Set up list of students      
-    student_lst = []
-    
-    # Get list of male students
-    males = db.execute("SELECT * FROM students WHERE class = ? AND gender IN (SELECT id FROM gender WHERE gender = ?)", periodx, "Male")
-    random.shuffle(males)    
-    for i in range(len(males)):
-        student_lst.append(males[i])  
-
-    # Get list of female students
-    females = db.execute("SELECT * FROM students WHERE class = ? AND gender IN (SELECT id FROM gender WHERE gender = ?)", periodx, "Female")
-    random.shuffle(females)
-    for i in range(len(females)):
-        student_lst.append(females[i])
-
-    # Get list of students without gender
-    blanks = db.execute("SELECT * FROM students WHERE class = ? AND gender IS NULL", periodx)  
-
-    # Check if class has no students
-    if not student_lst and not blanks:
-        return apology("No students in this class", 400)
-
-    # Make groups    
-    groupnum = int(round(len(student_lst) / 4))
-
-     # Check for small class size and display groups
-    if groupnum == 0:
-        groups = [student_lst]
-    
-    else:
-        groups = partition(student_lst, groupnum)    
-
-    return render_template("randomize.html", classname=classname, groups=groups, name=name, period=period, blanks=blanks)
 
 @app.route("/group", methods=["GET", "POST"])
 @login_required
@@ -388,7 +255,7 @@ def group():
         classname = period_id[0]["class"]                
         students = db.execute("SELECT * FROM students WHERE class = ?", periodx)
       
-        return render_template("group.html", name=name, period=period, classname=classname, students=students)
+        return render_template("group.html", name=name, period=period, classname=classname, students=students, methods=methods)
 
     # User reaches via GET
     else:
@@ -429,13 +296,16 @@ def grouped():
         # Check group method
         if not method or method.isspace():
             return apology("select grouping method", 400)
+        
+        if method not in methods:
+            return apology("select grouping method", 400)
 
         # RANDOM GROUPING
         if method == "Random": 
             # Make random groups
             groups = random_groups(students, size)
 
-            return render_template("randomize.html", classname=classname, groups=groups, name=name, period=period, students=students)
+            return render_template("grouped.html", classname=classname, groups=groups, name=name, period=period, students=students)
         
         # DIFFERENTIATED GROUPING
         if method == "Differentiated":
@@ -446,7 +316,7 @@ def grouped():
             else:
                 groups = partition(students, groupnum)
             
-            return render_template("randomize.html", classname=classname, groups=groups, name=name, period=period, students=students)
+            return render_template("grouped.html", classname=classname, groups=groups, name=name, period=period, students=students)
                 
         # KAGAN GROUPING
         if method == "Kagan":
@@ -471,7 +341,7 @@ def grouped():
             # Make groups    
             groups = chunk(final_groups, 4)
 
-            return render_template("randomize.html", classname=classname, groups=groups, name=name, period=period, students=students)
+            return render_template("grouped.html", classname=classname, groups=groups, name=name, period=period, students=students)
         
         # GENDER - HETEROGENEOUS GROUPING
         if method == "Gender - Heterogeneous":
@@ -503,7 +373,7 @@ def grouped():
             else:
                 groups = partition(student_lst, groupnum)
 
-            return render_template("randomize.html", classname=classname, groups=groups, name=name, period=period, blanks=blanks)
+            return render_template("grouped.html", classname=classname, groups=groups, name=name, period=period, blanks=blanks)
 
         # GENDER - HOMOGENEOUS GROUPING
         if method == "Gender - Homogeneous":
@@ -532,7 +402,7 @@ def grouped():
             else:
                 groups = partition(student_lst, groupnum)    
 
-            return render_template("randomize.html", classname=classname, groups=groups, name=name, period=period, blanks=blanks, methods=methods)
+            return render_template("grouped.html", classname=classname, groups=groups, name=name, period=period, blanks=blanks, methods=methods)
          
         else:
             return apology("todo", 400)
@@ -559,49 +429,7 @@ def grouptest():
 
     # User reaches via GET
     else:
-        return apology("TODO")      
-
-@app.route("/kagan", methods=["POST"])
-@login_required
-def kagan():
-    # Sort students into kagan groups
-
-    # Get specific class
-    teacher = db.execute("SELECT * FROM users WHERE id = ?", session["user_id"])
-    name = teacher[0]["usercase"]
-    period = request.args.get("period")
-    classname = period        
-    period_id = db.execute("SELECT * FROM classes WHERE teacher = ? and class = ?", session["user_id"], period)
-    periodx = period_id[0]["id"]
-    
-    # Get student list sorted by score
-    students = db.execute("SELECT * FROM students WHERE class = ? ORDER BY score DESC", periodx)
-    
-    # Check if class has any students
-    if not students:
-        return apology("No students in class", 400)
-
-    # Sort students into differentiated groups, shuffled       
-    diff_groups = partition(students, 4)
-    for group in diff_groups:
-        index = diff_groups.index(group)
-        for student in group:
-            student["group"] = index
-    for group in diff_groups:
-        random.shuffle(group)
-    
-    # Sort students kagan style
-    biggest = (max([len(group) for group in  diff_groups]))
-    final_groups = []
-    for i in range(biggest):
-        for j in range(len(diff_groups)):
-            if i < len(diff_groups[j]):
-                final_groups.append(diff_groups[j][i])            
-
-    # Make groups    
-    groups = chunk(final_groups, 4)
-
-    return render_template("randomize.html", classname=classname, groups=groups, name=name, period=period, students=students)    
+        return apology("TODO")   
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -648,37 +476,6 @@ def logout():
 
     # Redirect user to homepage
     return redirect("/")
-
-@app.route("/randomize", methods=["POST"])
-@login_required
-def randomize():
-    """Create random groups based on input"""
-    # Get specific class       
-    teacher = db.execute("SELECT * FROM users WHERE id = ?", session["user_id"])
-    name = teacher[0]["usercase"]
-    period = request.args.get("period")
-    classname = period        
-    period_id = db.execute("SELECT * FROM classes WHERE teacher = ? and class = ?", session["user_id"], period)
-    periodx = period_id[0]["id"]     
-
-    # Get list of students          
-    students = db.execute("SELECT * FROM students WHERE class = ?", periodx)    
-
-    # Check if class has any students
-    if not students:
-        return apology("No students in class", 400)
-    
-    # Make random groups
-    random.shuffle(students)
-    groupnum = int(round(len(students) / 4))
-    
-    if groupnum == 0:
-        groups = [students]
-    
-    else:
-        groups = partition(students, groupnum)
-
-    return render_template("randomize.html", classname=classname, groups=groups, name=name, period=period, students=students)
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
