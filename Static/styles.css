@@ -4,22 +4,47 @@ nav .navbar-brand
     font-size: xx-large;
 }
 
-tr.kagan0
+.bg-400
+{
+    background-color: #ced4da
+}
+
+.bg-500
+{
+    background-color: #adb5bd;
+}
+
+.female
+{
+    background-color: #615b81;
+}
+
+.male
+{
+    background-color: #4e7242;
+}
+
+.not_set
+{
+    background-color: darkgray;
+}
+
+li.kagan0
 {
     background-color: #DA9694;
 }
 
-tr.kagan1
+li.kagan1
 {
     background-color: #E6B8B7;
 }
 
-tr.kagan2
+li.kagan2
 {
     background-color: #B8CCE4;
 }
 
-tr.kagan3
+li.kagan3
 {
     background-color: #95B3D7;
 }

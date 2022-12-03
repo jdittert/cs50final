@@ -21,6 +21,11 @@ def apology(message, code=400):
         return s
     return render_template("apology.html", top=code, bottom=escape(message)), code
     
+def error(message, code=400):
+    current = request.path
+    template = current + ".html"
+    return redirect(request.url), code
+
 def login_required(f):
     """
     Decorate routes to require login.

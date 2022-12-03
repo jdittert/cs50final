@@ -5,85 +5,110 @@
 {% endblock %}
 
 {% block main %}
+<!-- Greeting -->    
     <div class="d-flex justify-content-start">
-        <p>{{ message }}, {{ name }}!</p>
+        <h4>{{ message }}, {{ name }}.</h4>
     </div>
-    <div class="d-flex">
-        <p class="fw-bold">Active Classes</p>
-    </div>
-    <div>        
-        {% for class in classes %}        
-        <div class="row row-cols-auto mb-3 p-2 {{ loop.cycle('bg-light' , 'bg-white') }} align-items-center justify-content-between">    
-            <div class="col-12 col-lg-9 mb-2">
-                <p>{{ class.class }}  <span class="badge bg-primary ms-2" >{{ class.count }}</span></p>
-                <small class="text-muted mt-n1">{{ class.subject }}</small>
+
+    <div class="card text-start">
+        <div class="card-header">
+            <ul class="nav nav-tabs card-header-tabs">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="active-tab" data-bs-toggle="tab" data-bs-target="#active_classes" type="button" role="tab" aria-controls="active_classes" aria-selected="true">
+                        Active
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="archived-tab" data-bs-toggle="tab" data-bs-target="#archived_classes" type="button" role="tab" aria-controls="archived_classes" aria-selected="false">
+                        Archived
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="add-tab" data-bs-toggle="tab" data-bs-target="#add_class" type="button" role="tab" aria-controls="add_class" aria-selected="false">
+                        Add Class
+                    </button>
+                </li>
+            </ul>
+        </div>
+        <div class="card-body">
+            <div class="tab-content" id="myTabContent">
+            <div class="tab-pane fade show active" id="active_classes" role="tabpanel" aria-labelledby="active-tab">
+                {% if classes %} 
+                    {% for class in classes %}        
+                    <div class="row row-cols-auto p-2 {{ loop.cycle('bg-light' , 'bg-white') }} align-items-center justify-content-between border-bottom">    
+                        <div class="col-12 col-lg-9 mb-2 text-start">
+                            <h5>{{ class.class }}  <span class="badge bg-secondary ms-2" >{{ class.count }}</span></h5>
+                            <small class="text-muted mt-n1">{{ class.subject }}</small>
+                        </div>
+                        <div class="col-lg-1 text-start">
+                            <form action="/group?period={{ class.class }}" method="post">
+                                <button class="btn btn-primary" type="submit" id="{{ class.class }}" name="{{ class.class}}">Group</button>
+                            </form>
+                        </div>
+                        <div class="col-lg-1 text-center">
+                            <form action="/edit?period={{ class.class }}" method="post">
+                                <button class="btn btn-primary" type="submit" id="edit{{ class.class }}" name="edit{{ class.class }}">Edit</button>     
+                            </form>
+                        </div>
+                        <div class="col-lg-1 text-end">
+                            <form action="/archive?period={{ class.class }}" method="post">
+                                <button class="btn btn-primary" type="submit" id="archive{{ class.class }}" name="archive{{ class.class }}">Archive</button>
+                            </form>
+                        </div>              
+                    </div>      
+                    {% endfor %} 
+                {% else %}
+                <p>You have no active classes.</p>
+                {% endif %}
             </div>
-            <div class="col-lg-1 text-start">
-                <form action="/group?period={{ class.class }}" method="post">
-                    <button class="btn btn-primary" type="submit" id="{{ class.class }}" name="{{ class.class}}">Group</button>
-                </form>
+            <div class="tab-pane fade" id="archived_classes" role="tabpanel" aria-labelledby="archived-tab">
+                {% if archived %} 
+                    {% for class in archived %}        
+                    <div class="row row-cols-auto p-2 {{ loop.cycle('bg-light' , 'bg-white') }} align-items-center justify-content-between border-bottom">    
+                        <div class="col-12 col-lg-9 mb-2 text-start">
+                            <h5>{{ class.class }}  <span class="badge bg-secondary ms-2" >{{ class.count }}</span></h5>
+                            <small class="text-muted mt-n1">{{ class.subject }}</small>
+                        </div> 
+                        <div class="col-lg-1 text-end">
+                            <form action="/restore?period={{ class.class }}" method="post">
+                                <button class="btn btn-primary" type="submit" id="restore{{ class.class }}" name="restore{{ class.class }}">Restore</td>     
+                            </form>
+                        </div>              
+                    </div>      
+                    {% endfor %} 
+                {% else %}
+                <p>You have no archived classes.</p>
+                {% endif %}
             </div>
-            <div class="col-lg-1 text-center">
-                <form action="/edit?period={{ class.class }}" method="post">
-                    <button class="btn btn-primary" type="submit" id="edit{{ class.class }}" name="edit{{ class.class }}">Edit</button>     
-                </form>
-            </div>
-            <div class="col-lg-1 text-end">
-                <form action="/archive?period={{ class.class }}" method="post">
-                    <button class="btn btn-primary" type="submit" id="archive{{ class.class }}" name="archive{{ class.class }}">Archive</button>
-            </div>              
-        </div>      
-        {% endfor %}        
-    </div>
-    
-    <div class="mb-4">
-        <h2 class="text-start">Add a new class:</h2>
-        <div>
-        <form action="/add_class" method="post">
-            <div class="row">
-                <div class="form-group col-auto">
-                    <label for="class" hidden>Class</label>
-                    <input autocomplete="off" class="form-control" id="class" name="class" placeholder="Class Name" type="text" aria-describedby="classHelpBlock"> 
-                    <small id="classHelpBlock" class="form-text text-muted">
-                        Your class names must be unique, so consider adding a term or year to the name. <i>(First Hour 2022, for example.)</i></small>  
+            <div class="tab-pane fade" id="add_class" role="tabpanel" aria-labelledby="add_class-tab">
+                <div>
+                    <p>Add a class:</p>
                 </div>
-                <div class="col-auto">
-                    <label for="subject" hidden>Subject</label>         
-                    <input class="form-control" id="subject" name="subject" placeholder="Subject" type="text">  
-                </div>   
-                <div class="col-auto">
-                    <button class="btn btn-primary" type="submit">Add Class</button> 
-                </div>           
+                <form action="/add_class" method="post">
+                    <div class="row">
+                        <div class="form-group col-auto mb-2">
+                            <label for="class" hidden>Class</label>
+                            <input autocomplete="off" class="form-control" id="class" name="class" placeholder="Class Name" type="text" aria-describedby="classHelpBlock"> 
+                            <small id="classHelpBlock" class="form-text text-muted">
+                                Your class names must be unique, so consider adding a term or year to the name. <i>(First Hour 2022, for example.)</i></small>  
+                        </div>
+                        <div class="col-auto">
+                            <label for="subject" hidden>Subject</label>         
+                            <input class="form-control" id="subject" name="subject" placeholder="Subject" type="text">  
+                        </div>   
+                        <div class="col-auto">
+                            <button class="btn btn-primary" type="submit">Add Class</button> 
+                        </div>           
+                    </div>
+                    {% if error_msg %}
+                    <div class="row">                
+                        <small class="text-danger">{{ error_msg }}</small>
+                    </div>
+                    {% endif %}
+                </form>      
+            </div>
             </div>            
-        </form>   
-        </div>     
-    </div>  
-    <div class="d-flex justify-content-start">
-        <button href="#archivedClasses" class="btn btn-primary" data-bs-toggle="collapse" aria-expanded="false" aria-controls="archivedClasses">Show Archived Classes</button>
-    </div>
-    <div id="archivedClasses" class="collapse">
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th class="text-start">Class</th>
-                <th class="text-start d-none d-sm-block">Subject</th>                         
-                <th class="text-end">Restore</th>               
-            </tr>
-        </thead>
-        <tbody>
-            {% for class in archived %}
-                <tr>
-                    <td class="text-start">{{ class.class }} ({{ class.count }})</td>
-                    <td class="text-start d-none d-sm-block">{{ class.subject }}</td>                    
-                    <td class="text-end">
-                        <form action="/restore?period={{ class.class }}" method="post">
-                            <button class="btn btn-primary" type="submit" id="restore{{ class.class }}" name="restore{{ class.class }}">Restore</td>     
-                        </form>
-                    </td>                      
-                </tr>
-            {% endfor %}
-        </tbody>        
-    </table>
+        </div>        
     </div>   
     
 {% endblock %}

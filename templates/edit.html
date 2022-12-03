@@ -20,8 +20,10 @@
     </div>
     <div class="container-fluid">
         {% for student in students %}
-            <form class="row gy-3 mb-2 justify-content-center" action="/update?studentid={{ student.id }}&period={{ classname }}" method="post">
-                <div class="col-auto">
+        <div class="row">
+            <div class="col-10">
+            <form class="row" action="/update?studentid={{ student.id }}&period={{ classname }}" method="post">
+                <div class="col-4">
                     <div class="input-group">
                         <div class="input-group-text">
                         <label for="name">Name:</label>
@@ -29,7 +31,7 @@
                         <input autocomplete="off" autofocus class="form-control mx-auto w-auto" id="name" name="name" value="{{ student.name }}" type="text">   
                     </div>
                 </div>
-                <div class="col-auto">
+                <div class="col-2">
                     <div class="input-group">   
                         <div class="input-group-text">
                         <label for="class">Class:</label>
@@ -46,7 +48,7 @@
                         </select>            
                     </div>
                 </div>
-                <div class="col-auto">
+                <div class="col-2">
                     <div class="input-group">   
                         <div class="input-group-text">
                         <label for="gender">Gender:</label>
@@ -63,7 +65,7 @@
                         </select>
                     </div>            
                 </div>
-                <div class="col-auto">
+                <div class="col-1">
                     <div class="input-group">   
                         <div class="input-group-text">
                         <label for="class">Score:</label>
@@ -71,15 +73,17 @@
                         <input class="form-control mx-auto w-auto" id="score" name="score" placeholder="Score" value="{{ student.score }}" type="number">            
                     </div>
                 </div>
-                <div class="col-auto">       
+                <div class="col-1">       
                     <button class="btn btn-primary mx-auto w-auto" type="submit">Update Student</button>
                 </div>
-                <div class="col-auto">
+            </form>
+            </div>
+                <div class="col-2">
                     <form action="/delete?studentid={{ student.id }}&period={{ classname }}" method="post">
                         <button class="btn btn-danger" type="submit" id="delete{{ student.id }}" name="delete{{ student.id }}">Delete</button>
                     </form>
-                </div> 
-            </form>
+                </div>  
+            </div>          
         {% endfor %}        
     </div>        
    

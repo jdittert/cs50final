@@ -2,12 +2,12 @@ import os
 import random
 
 from cs50 import SQL
-from flask import Flask, flash, redirect, render_template, request, session
+from flask import Flask, flash, redirect, render_template, Response, request, session, url_for
 from flask_session import Session
 from tempfile import mkdtemp
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from helpers import apology, chunk, login_required, partition, random_groups
+from helpers import apology, chunk, error, login_required, partition, random_groups
 
 # Configure application
 app = Flask(__name__)
@@ -43,7 +43,11 @@ def after_request(response):
 @app.route("/")
 def index():
     # Show homepage
-    return render_template("index.html")
+    if session.get("user_id") is None:
+        return render_template("index.html")
+
+    else:
+        return redirect("/classes")
 
 @app.route("/add_class", methods=["POST"])
 @login_required
@@ -51,16 +55,16 @@ def add_class():
     # Add a class
     # Check for class field
     if not request.form.get("class") or request.form.get("class").isspace():
-        return apology("please enter class name", 400)
+        return error("Please enter class name", 400)
 
     # Check for subject field
     if not request.form.get("subject") or request.form.get("subject").isspace():
-        return apology("please enter subject", 400)
+        return error("Please enter subject", 400)
 
     # Check for unique class name
     classname = db.execute("SELECT * FROM classes WHERE class = ?", request.form.get("class"))
     if len(classname) != 0:
-        return apology("class name already used", 400)
+        return error("Class name already used", 400)
 
     # Add class to database
     db.execute(
@@ -196,11 +200,11 @@ def classes():
 
     # If there are no classes
     if not classes:
-        message = "You have not entered any classes"
+        message = "Your classes will show up here"
         return render_template("classes.html", name=name, message=message)
     
     else:
-        message = "Here are you classes"
+        message = "Here are your classes"
         return render_template("classes.html", archived=archived, name=name, message=message, classes=classes)               
     
 @app.route("/delete", methods=["POST"])
@@ -254,6 +258,14 @@ def group():
         periodx = period_id[0]["id"]
         classname = period_id[0]["class"]                
         students = db.execute("SELECT * FROM students WHERE class = ?", periodx)
+        genders = db.execute("SELECT * FROM gender")
+
+        for student in students:
+            if student["gender"]:
+                genderint = int(student["gender"])
+                student["genderid"] = genders[(genderint - 1)]["gender"]
+            else:
+                student["genderid"] = "Not Set"
       
         return render_template("group.html", name=name, period=period, classname=classname, students=students, methods=methods)
 
@@ -305,7 +317,7 @@ def grouped():
             # Make random groups
             groups = random_groups(students, size)
 
-            return render_template("grouped.html", classname=classname, groups=groups, name=name, period=period, students=students)
+            return render_template("grouped.html", classname=classname, groups=groups, methods=methods, name=name, period=period, students=students)
         
         # DIFFERENTIATED GROUPING
         if method == "Differentiated":
@@ -316,7 +328,7 @@ def grouped():
             else:
                 groups = partition(students, groupnum)
             
-            return render_template("grouped.html", classname=classname, groups=groups, name=name, period=period, students=students)
+            return render_template("grouped.html", classname=classname, groups=groups, methods=methods, name=name, period=period, students=students)
                 
         # KAGAN GROUPING
         if method == "Kagan":
@@ -338,10 +350,11 @@ def grouped():
                     if i < len(diff_groups[j]):
                         final_groups.append(diff_groups[j][i])            
 
-            # Make groups    
+            # Make groups
+            kagan = True
             groups = chunk(final_groups, 4)
 
-            return render_template("grouped.html", classname=classname, groups=groups, name=name, period=period, students=students)
+            return render_template("grouped.html", classname=classname, groups=groups, kagan=kagan, methods=methods, name=name, period=period, students=students)
         
         # GENDER - HETEROGENEOUS GROUPING
         if method == "Gender - Heterogeneous":
@@ -353,6 +366,16 @@ def grouped():
             females = db.execute("SELECT * FROM students WHERE class = ? AND gender IN (SELECT id FROM gender WHERE gender = ?)", periodx, "Female")           
             blanks = db.execute("SELECT * FROM students WHERE class = ? AND gender IS NULL", periodx)
             
+            # Make color schemes
+            for male in males:
+                male["gender_color"] = "male"
+            
+            for female in females:
+                female["gender_color"] = "female"
+
+            for blank in blanks:
+                blank["gender_color"] = "not_set"
+
             # Shuffle lists separately and extend
             random.shuffle(males)
             random.shuffle(females)
@@ -361,19 +384,22 @@ def grouped():
             fl = len(females)
 
             for i in range(max(ml, fl)):
-                if i < ml:
+                if males and i < ml:
                     student_lst.append(males[i])
-                if i < fl:
+                if females and i < fl:
                     student_lst.append(females[i])           
 
+            # Set gender color scheme
+            gender_color = True
+
             # Check for small class size and display groups
-            if groupnum == 0:
+            if groupnum == 0 or size > len(student_lst):
                 groups = [student_lst]
             
             else:
                 groups = partition(student_lst, groupnum)
 
-            return render_template("grouped.html", classname=classname, groups=groups, name=name, period=period, blanks=blanks)
+            return render_template("grouped.html", classname=classname, gender_color=gender_color, groups=groups, methods=methods, name=name, period=period, blanks=blanks)
 
         # GENDER - HOMOGENEOUS GROUPING
         if method == "Gender - Homogeneous":
@@ -395,41 +421,33 @@ def grouped():
             # Get list of students without gender
             blanks = db.execute("SELECT * FROM students WHERE class = ? AND gender IS NULL", periodx)  
 
+            # Make color schemes
+            for male in males:
+                male["gender_color"] = "male"
+            
+            for female in females:
+                female["gender_color"] = "female"
+
+            for blank in blanks:
+                blank["gender_color"] = "not_set"
+            
+            # Set gender color scheme
+            gender_color = True
+            
             # Check for small class size and display groups
-            if groupnum == 0:
+            if groupnum == 0 or size > len(student_lst):
                 groups = [student_lst]
     
             else:
                 groups = partition(student_lst, groupnum)    
 
-            return render_template("grouped.html", classname=classname, groups=groups, name=name, period=period, blanks=blanks, methods=methods)
+            return render_template("grouped.html", classname=classname, gender_color=gender_color, groups=groups, methods=methods, name=name, period=period, blanks=blanks)
          
         else:
             return apology("todo", 400)
     
     else:
         return redirect("/classes")
-
-@app.route("/grouptest", methods=["GET", "POST"])
-@login_required
-def grouptest():
-    # Group students
-
-    # User reaches via POST
-    if request.method == "POST":
-        teacher = db.execute("SELECT * FROM users WHERE id = ?", session["user_id"])
-        name = teacher[0]["usercase"]
-        period = request.args.get("period")        
-        period_id = db.execute("SELECT * FROM classes WHERE teacher = ? and class = ?", session["user_id"], period)
-        periodx = period_id[0]["id"]
-        classname = period_id[0]["class"]                
-        students = db.execute("SELECT * FROM students WHERE class = ?", periodx)
-      
-        return render_template("group-test.html", name=name, period=period, classname=classname, students=students, methods=methods)
-
-    # User reaches via GET
-    else:
-        return apology("TODO")   
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -442,12 +460,12 @@ def login():
     if request.method == "POST":
 
         # Ensure username was submitted
-        if not request.form.get("username"):
-            return apology("must provide username", 400)
+        if not request.form.get("username"):            
+            return error("Please input a user name", 400)
 
         # Ensure password was submitted
-        elif not request.form.get("password"):
-            return apology("must provide password", 400)
+        elif not request.form.get("password"):            
+            return error("Password field left blank", 400)
 
         # Query database for username
         username = request.form.get("username").lower()
@@ -455,7 +473,7 @@ def login():
 
         # Ensure username exists and password is correct
         if len(rows) != 1 or not check_password_hash(rows[0]["hash"], request.form.get("password")):
-            return apology("invalid username and/or password", 400)
+            return error("Invalid username and/or password", 400)
 
         # Remember which user has logged in
         session["user_id"] = rows[0]["id"]
@@ -482,26 +500,26 @@ def register():
     if request.method == "POST":
 
         # Ensure username was submitted
-        if not request.form.get("username"):
-            return apology("must provide username", 400)
+        if not request.form.get("username") or request.form.get("username").isspace():            
+            return error("Must provide username", 400)
 
         # Ensure password was submitted
-        elif not request.form.get("password"):
-            return apology("must provide password", 400)
+        elif not request.form.get("password") or request.form.get("password").isspace():
+            return error("Must provide password", 400)
 
         # Ensure confirmation was submitted
         elif not request.form.get("confirmation"):
-            return apology("must provide confirmation", 400)
+            return error("Passwords do not match", 400)
 
         # Ensure username is unique
         username = request.form.get("username").lower()
         rows = db.execute("SELECT * FROM users WHERE username = ?", username)
         if len(rows) != 0:
-            return apology("username already taken", 400)
+            return error("Username already taken", 400)
 
         # Ensure password and confirmation match
         elif request.form.get("password") != request.form.get("confirmation"):
-            return apology("passwords do not match", 400)
+            return error("Passwords do not match", 400)
 
         # Hash password
         hash = generate_password_hash(request.form.get("password"), method="pbkdf2:sha256", salt_length=8)
@@ -514,7 +532,7 @@ def register():
         current = db.execute("SELECT * FROM users WHERE username = ?", username)
         session["user_id"] = current[0]["id"]
 
-        return redirect("/")
+        return redirect("/classes")
 
     # User reaches route via GET
     else:
@@ -567,7 +585,7 @@ def update():
         student_lst.append(int(your_students[i]["id"]))
     
     if not student_id:
-        return apology("Select a student", 400)
+        return error("Select a student", 400)
 
     elif not student_id in student_lst:
         return apology("Stop hacking.", 400)   
@@ -620,11 +638,10 @@ def update():
         if not new_score.isnumeric():
             return apology("Score must be integer 0-100", 400)
         
-        elif new_score > 100 or new_score < 0:
-            return apology("Score must be integer 0-100", 400)
+        new_score = int(new_score)
         
-        else:
-            new_score = int(new_score)
+        if new_score > 100 or new_score < 0:
+            return apology("Score must be integer 0-100", 400)       
     
     if not new_score:
         new_score = None   

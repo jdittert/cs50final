@@ -5,21 +5,21 @@
 {% endblock %}
 
 {% block main %}
-    <div class="mb-3">
+    <div class="mb-3 d-flex justify-content-start">
         <h2>{{ name }}'s {{ period }}</h2>
     </div>    
     <div>
-        <form action="/grouped?period={{ classname }}" class="row justify-content-start" method="post">
-            <div class="col-auto">                
+        <form action="/grouped?period={{ classname }}" class="row" method="post">
+            <div class="col-auto mb-2">                
                 <div class="input-group">
                     <div class="input-group-text">
                         <label for="groupsize">Students Per Group:</label>
                     </div>
                     <input autocomplete="off" class="form-control" id="groupsize" name="groupsize" placeholder="Group Size" type="text" aria-describedby="groupsizeHelpBlock">
                 </div>  
-                <small id="groupsizeHelpBlock" class="form-text text-muted">Note: Kagan group size defaults to 4.</small>              
+                <small id="groupsizeHelpBlock" class="d-flex form-text text-muted text-start">Note: Kagan group size defaults to 4.</small>              
             </div>            
-            <div class="col-auto">               
+            <div class="col-auto mb-2">               
                 <div class="input-group">
                     <div class="input-group-text">
                         <label for="method">Grouping Method</label>
@@ -31,7 +31,7 @@
                     </select>
                 </div>                                             
             </div>
-            <div class="col-auto">
+            <div class="col-auto mb-2">
                 <button class="btn btn-primary" type="submit">Make Groups</button>
             </div>
         </form>
@@ -39,22 +39,22 @@
     <div>
     <table class="table table-striped">
         <thead>
-            <tr>
-                <th class="text-start">ID</th>
+            <tr>                
                 <th class="text-start">Student</th>  
-                <th class="text-start">Score</th>                              
+                <th class="text-start">Score</th>
+                <th class="text-start">Gender</th>                             
             </tr>
         </thead>
         <tbody>
             {% for student in students %}
                 <tr>
-                    <td class="text-start">{{ student.id }}</td>
                     <td class="text-start">{{ student.name }}</td> 
-                    <td class="text-start">{{ student.score }}</td>                                       
+                    <td class="text-start" name="score">{{ student.score }}</td>                    
+                    <td class="text-start">{{ student.genderid }}</td>                                      
                 </tr>
             {% endfor %}
         </tbody>        
     </table> 
-    </div>   
+    </div>    
     
 {% endblock %}

@@ -5,52 +5,78 @@
 {% endblock %}
 
 {% block main %}
-    <div class="mb-4">
+    <div class="mb-3">
         <h2>{{ name }}'s {{ period }}</h2>
     </div>    
-    <div class="row mb-3">
-        <div class="col-auto">
-            <p>New Groups:</p>
-        </div>
-        <div class="col-auto">
-            <form action="/randomize?period={{ classname }}" method="post">
-                <button class="btn btn-primary" type="submit" id="randomize" name="randomize">Random</button>
-            </form>
-        </div>
-        <div class="col-auto">
-            <form action="/differentiated?period={{ classname }}" method="post">
-                <button class="btn btn-primary" type="submit" id="differentiated" name="differentiated">Differentiated</button>
-            </form>
-        </div>
-        <div class="col-auto">
-            <form action="/kagan?period={{ classname }}" method="post">
-                <button class="btn btn-primary" type="submit" id="kagan" name="kagan">Kagan</button>
-            </form>
-        </div>
-        <div class="col-auto">
-            <form action="/gender_homo?period={{ classname }}" method="post">
-                <button class="btn btn-primary" type="submit" id="gender_homogeneous" name="gender_homogeneous">Gender - Homogeneous</button>
-            </form>
-        </div>
-        <div class="col-auto">
-            <form action="/gender_hetero?period={{ classname }}" method="post">
-                <button class="btn btn-primary" type="submit" id="gender_heterogeneous" name="gender_heterogeneous">Gender - Heterogeneous</button>
-            </form>
-        </div>
-    </div>          
+    <div class="mb-3">
+        <form action="/grouped?period={{ classname }}" class="row" method="post">
+            <div class="col-auto mb-2">                
+                <div class="input-group">
+                    <div class="input-group-text">
+                        <label for="groupsize">Students Per Group:</label>
+                    </div>
+                    <input autocomplete="off" class="form-control" id="groupsize" name="groupsize" placeholder="Group Size" type="text" aria-describedby="groupsizeHelpBlock">
+                </div>  
+                <small id="groupsizeHelpBlock" class="d-flex form-text text-muted text-start">Note: Kagan group size defaults to 4.</small>              
+            </div>            
+            <div class="col-auto mb-2">               
+                <div class="input-group">
+                    <div class="input-group-text">
+                        <label for="method">Grouping Method</label>
+                    </div>
+                    <select autocomplete="off" class="form-control" id="method" name="method">
+                        {% for method in methods %}
+                        <option value="{{ method }}">{{ method }}</option>
+                        {% endfor %}
+                    </select>
+                </div>                                             
+            </div>
+            <div class="col-auto mb-2">
+                <button class="btn btn-primary" type="submit">Make New Groups</button>
+            </div>
+        </form>
+    </div>
     <div class="d-sm-flex flex-wrap">
         {% for group in groups %}
-        <div class="card flex-fill">
-            <div class="card-header fw-bold text-white {{ loop.cycle('bg-primary bg-gradient' , 'bg-secondary bg-gradient') }}">                
+        <div class="card flex-fill mb-3">
+            <div class="card-header fw-bold text-dark {{ loop.cycle('bg-400 bg-gradient' , 'bg-500 bg-gradient') }}">                
                 Group {{ loop.index }}
             </div>
+            {% if kagan %}
             <ul class="list-group list-group-flush">
                 {% for student in group %}
-                <li class="list-group-item justify-content-start">{{ student.name }}</li>
+                <li class="list-group-item kagan{{ student.group }}">{{ student.name }}</li>
                 {% endfor %}
             </ul>
+            {% elif gender_color %}
+            <ul class="list-group list-group-flush">
+                {% for student in group %}
+                <li class="list-group-item text-white {{ student.gender_color }}">{{ student.name }}</li>
+                {% endfor %}
+            </ul>
+            {% else %}            
+            <ul class="list-group list-group-flush">
+                {% for student in group %}
+                <li class="list-group-item">{{ student.name }}</li>
+                {% endfor %}
+            </ul>
+            {% endif %}
         </div>
         {% endfor %}
-    </div>     
+    </div>
+    {% if gender_color and blanks %}
+    <div class="card flex-fill mb-3">
+        <div class="card-header bg-400 fw-bold text-dark">
+            Gender Not Set
+        </div>
+        <ul class="list-group list-group-flush">
+            {% for student in blanks %}
+            <li class="list-group-item text-dark {{student.gender_color }}">{{ student.name }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+        
+        
             
 {% endblock %}
