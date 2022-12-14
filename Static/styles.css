@@ -14,14 +14,19 @@ nav .navbar-brand
     background-color: #adb5bd;
 }
 
+.bg-bluegray
+{
+    background-color: #98afc7;
+}
+
 .female
 {
-    background-color: #615b81;
+    background-color: #c797ae;
 }
 
 .male
 {
-    background-color: #4e7242;
+    background-color: #aec797;
 }
 
 .not_set

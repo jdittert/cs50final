@@ -50,13 +50,29 @@
             </div>
         </nav>
 
-        {% if get_flashed_messages() %}
+        {% with errors = get_flashed_messages(category_filter=["error"]) %}
+        {% if errors %}
+        <header>
+            <div class="alert alert-danger mb-0 text-center" role="alert">           
+                
+                    {%- for msg in errors %}
+                    {{ msg }}
+                    {% endfor -%}
+                
+            </div>
+        </header>
+        {% endif %}
+        {% endwith %}            
+        
+        {% with messages = get_flashed_messages(category_filter=["message"]) %}
+        {% if messages %}
             <header>
                 <div class="alert alert-primary mb-0 text-center" role="alert">
-                    {{ get_flashed_messages() | join(" ") }}
+                    {{ messages | join(" ") }}
                 </div>
             </header>
         {% endif %}
+        {% endwith %}
 
         <main class="container py-5 text-start">
             {% block main %}{% endblock %}

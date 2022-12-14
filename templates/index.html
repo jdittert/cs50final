@@ -7,14 +7,29 @@
 {% block main %}    
 <div class="d-grid gap-3">   
     <div class="row gx-2">
-    <div class="col-md-5 border shadow-sm p-3 mb-5 bg-light rounded">        
-        <form action="/login" method="post">
+        <div class="col-md-7 text-start mx-auto px-2">    
+            <p>Welcome to RandomClassroom! With this app you can:
+                <ul>
+                    <li>Store class rosters.</li>
+                    <li>Create random groups of any size.</li>
+                    <li>Create differentiated and Kagan-style groupings.</li>
+                    <li>Create random groups based on gender.</li>
+                </ul>
+            </p>
+        </div>   
+        <div class="col-md-5 border shadow-sm p-3 mb-5 bg-light rounded">        
+        <form action="/login_index" method="post">
             <div class="mb-3">
                 <input autocomplete="off" autofocus class="form-control mx-auto w-auto" id="username" name="username" placeholder="Username" type="text">
             </div>
             <div class="mb-3">
                 <input class="form-control mx-auto w-auto" id="password" name="password" placeholder="Password" type="password">
             </div>
+            {% if error_message %}
+            <div class="mb-3 text-center">
+                <small class="text-danger text-center">{{ error_message }}</small>
+            </div>
+            {% endif %}
             <div class="d-flex justify-content-center mb-3">
             <button class="btn btn-primary" type="submit">Log In</button>
             </div>
@@ -22,17 +37,7 @@
                 <p><a href="/register" class="link-primary">Create an account.</a></p>
             </div>
         </form>          
-    </div>    
-    <div class="col-md-7 text-start mx-auto px-2">    
-        <p>Welcome to RandomClassroom! With this app you can:
-            <ul>
-                <li>Store class rosters.</li>
-                <li>Create random groups of any size.</li>
-                <li>Create differentiated and Kagan-style groupings.</li>
-                <li>Create random groups based on gender.</li>
-            </ul>
-        </p>
-    </div>  
+    </div>
 </div>  
 </div>
 {% endblock %}

@@ -51,7 +51,7 @@
             {% elif gender_color %}
             <ul class="list-group list-group-flush">
                 {% for student in group %}
-                <li class="list-group-item text-white {{ student.gender_color }}">{{ student.name }}</li>
+                <li class="list-group-item text-dark {{ student.gender_color }}">{{ student.name }}</li>
                 {% endfor %}
             </ul>
             {% else %}            

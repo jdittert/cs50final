@@ -7,24 +7,14 @@ from flask import redirect, render_template, request, session
 from functools import wraps
 
 
-def apology(message, code=400):
-    """Render message as an apology to user."""
-    def escape(s):
-        """
-        Escape special characters.
+def error_login(message, code=400):
+    return render_template("login.html", error_message=message), code
 
-        https://github.com/jacebrowning/memegen#special-characters
-        """
-        for old, new in [("-", "--"), (" ", "-"), ("_", "__"), ("?", "~q"),
-                         ("%", "~p"), ("#", "~h"), ("/", "~s"), ("\"", "''")]:
-            s = s.replace(old, new)
-        return s
-    return render_template("apology.html", top=code, bottom=escape(message)), code
-    
-def error(message, code=400):
-    current = request.path
-    template = current + ".html"
-    return redirect(request.url), code
+def error_index(message, code=400):
+    return render_template("index.html", error_message=message), code
+
+def error_register(message, code=400):
+    return render_template("register.html", error_message=message), code    
 
 def login_required(f):
     """

@@ -8,9 +8,9 @@
     <div class="mb-3 d-flex justify-content-start">
         <h2>{{ name }}'s {{ period }}</h2>
     </div>    
-    <div>
+    <div class="mb-2">
         <form action="/grouped?period={{ classname }}" class="row" method="post">
-            <div class="col-auto mb-2">                
+            <div class="col-auto">                
                 <div class="input-group">
                     <div class="input-group-text">
                         <label for="groupsize">Students Per Group:</label>
@@ -31,10 +31,13 @@
                     </select>
                 </div>                                             
             </div>
-            <div class="col-auto mb-2">
+            <div class="col-auto">
                 <button class="btn btn-primary" type="submit">Make Groups</button>
             </div>
         </form>
+        {% if message %}
+        <small class="text-danger">Error message.</small>
+        {% endif %}
     </div>
     <div>
     <table class="table table-striped">

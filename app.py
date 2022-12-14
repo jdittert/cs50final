@@ -2,12 +2,12 @@ import os
 import random
 
 from cs50 import SQL
-from flask import Flask, flash, redirect, render_template, Response, request, session, url_for
+from flask import Flask, flash, redirect, render_template, request, session
 from flask_session import Session
 from tempfile import mkdtemp
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from helpers import apology, chunk, error, login_required, partition, random_groups
+from helpers import chunk, error_login, error_index, error_register, login_required, partition, random_groups
 
 # Configure application
 app = Flask(__name__)
@@ -55,16 +55,19 @@ def add_class():
     # Add a class
     # Check for class field
     if not request.form.get("class") or request.form.get("class").isspace():
-        return error("Please enter class name", 400)
+        flash("Please enter class name", "error")
+        return redirect("/classes")
 
     # Check for subject field
     if not request.form.get("subject") or request.form.get("subject").isspace():
-        return error("Please enter subject", 400)
+        flash("Please enter a subject", "error")
+        return redirect("/classes")
 
     # Check for unique class name
     classname = db.execute("SELECT * FROM classes WHERE class = ?", request.form.get("class"))
     if len(classname) != 0:
-        return error("Class name already used", 400)
+        flash("Class name already used", "error")
+        return redirect("/classes")
 
     # Add class to database
     db.execute(
@@ -83,7 +86,8 @@ def add_student():
         
         # If name or class is left blank
         if not request.form.get("name") or not request.form.get("class"):
-            return apology("Enter name and class", 400)
+            flash("Enter name and class", "error")
+            return redirect("/add_student")
 
         # Select for class ID
         period = db.execute("SELECT id FROM classes WHERE class = ? AND teacher = ?", request.form.get("class"), session["user_id"])
@@ -91,7 +95,8 @@ def add_student():
         
         # If class ID does not exist
         if not period:
-            return apology("Class has not been created yet", 400)
+            flash("Class has not been created yet", "error")
+            return redirect("/add_student")
 
         # Set gender to integer
         if request.form.get("gender"):
@@ -129,18 +134,21 @@ def add_students():
     # Add multiple students to a class (name and class only)
 
     # Check for blank fields
-    if not request.form.get("students") or not request.form.get("bclass"):
-        return apology("Enter at least one student and a class", 400)
+    if not request.form.get("students") or not request.form.get("bclass"):        
+        flash("Enter at least one student and a class", "error")
+        return redirect("/add_student")
 
     if request.form.get("students").isspace() or request.form.get("bclass").isspace():
-        return apology("Enter at least one student and a class", 400)
+        flash("Enter at least one student and a class", "error")
+        return redirect("/add_student")
 
     # Select for class ID
     period = db.execute("SELECT id FROM classes WHERE class = ? AND teacher = ?", request.form.get("bclass"), session["user_id"])
     
     # If class ID does not exist
     if not period:
-        return apology("Class has not been created yet", 400)
+        flash("Class has not been created yet", "error")
+        return redirect("/add_student")
     
     period = int(period[0]["id"])
 
@@ -244,7 +252,7 @@ def faq():
     return render_template("faq.html")
 
 
-@app.route("/group", methods=["GET", "POST"])
+@app.route("/group", methods=["POST"])
 @login_required
 def group():
     # Group students
@@ -260,6 +268,11 @@ def group():
         students = db.execute("SELECT * FROM students WHERE class = ?", periodx)
         genders = db.execute("SELECT * FROM gender")
 
+        # Check if class has any students
+        if not students:
+            flash("No students in class.", "error")
+            return redirect("/classes")
+        
         for student in students:
             if student["gender"]:
                 genderint = int(student["gender"])
@@ -267,11 +280,7 @@ def group():
             else:
                 student["genderid"] = "Not Set"
       
-        return render_template("group.html", name=name, period=period, classname=classname, students=students, methods=methods)
-
-    # User reaches via GET
-    else:
-        return apology("TODO") 
+        return render_template("group.html", name=name, period=period, classname=classname, students=students, methods=methods)  
 
 @app.route("/grouped", methods=["GET", "POST"])
 @login_required
@@ -287,30 +296,38 @@ def grouped():
         classname = period_id[0]["class"]                
         students = db.execute("SELECT * FROM students WHERE class = ? ORDER BY score DESC", periodx)
         size = request.form.get("groupsize")
-        method = request.form.get("method")        
+        method = request.form.get("method")   
+        genders = db.execute("SELECT * FROM gender")
 
-        # Check if class has any students
-        if not students:
-            return apology("No students in class", 400)
+        for student in students:
+            if student["gender"]:
+                genderint = int(student["gender"])
+                student["genderid"] = genders[(genderint - 1)]["gender"]
+            else:
+                student["genderid"] = "Not Set"     
         
         # Check for class size
         if not size or not size.isnumeric():
-            return apology("Invalid students per group", 400)
+            flash("Invalid group size.", "error")
+            return render_template("group.html", name=name, period=period, classname=classname, students=students, methods=methods)            
 
         # Class size to int and check
         size = int(size)
         if not size > 0 or size > len(students):
-            return apology("invalid students per group", 400)
+            flash("Invalid students per group.", "error")
+            return render_template("group.html", name=name, period=period, classname=classname, students=students, methods=methods)
         
         # Set groupnum
         groupnum = int(round(len(students) / size))
 
         # Check group method
         if not method or method.isspace():
-            return apology("select grouping method", 400)
+            flash("Select grouping method.", "error")
+            return render_template("group.html", name=name, period=period, classname=classname, students=students, methods=methods)
         
         if method not in methods:
-            return apology("select grouping method", 400)
+            flash("Select grouping method.", "error")
+            return render_template("group.html", name=name, period=period, classname=classname, students=students, methods=methods)
 
         # RANDOM GROUPING
         if method == "Random": 
@@ -444,7 +461,7 @@ def grouped():
             return render_template("grouped.html", classname=classname, gender_color=gender_color, groups=groups, methods=methods, name=name, period=period, blanks=blanks)
          
         else:
-            return apology("todo", 400)
+            return redirect("/")
     
     else:
         return redirect("/classes")
@@ -460,12 +477,12 @@ def login():
     if request.method == "POST":
 
         # Ensure username was submitted
-        if not request.form.get("username"):            
-            return error("Please input a user name", 400)
+        if not request.form.get("username"):                      
+            return error_login("Invalid username and/or password.", 400)
 
         # Ensure password was submitted
         elif not request.form.get("password"):            
-            return error("Password field left blank", 400)
+            return error_login("Invalid username and/or password.", 400)
 
         # Query database for username
         username = request.form.get("username").lower()
@@ -473,7 +490,7 @@ def login():
 
         # Ensure username exists and password is correct
         if len(rows) != 1 or not check_password_hash(rows[0]["hash"], request.form.get("password")):
-            return error("Invalid username and/or password", 400)
+            return error_login("Invalid username and/or password", 400)
 
         # Remember which user has logged in
         session["user_id"] = rows[0]["id"]
@@ -484,6 +501,42 @@ def login():
     # User reached route via GET (as by clicking a link or via redirect)
     else:
         return render_template("login.html")
+
+@app.route("/login_index", methods=["POST"])
+def login_index():
+    """Log user in from index page"""
+
+    # Forget any user_id
+    session.clear()
+
+    # User reached route via POST (as by submitting a form via POST)
+    if request.method == "POST":
+
+        # Ensure username was submitted
+        if not request.form.get("username"):                      
+            return error_index("Invalid username and/or password.", 400)
+
+        # Ensure password was submitted
+        elif not request.form.get("password"):            
+            return error_index("Invalid username and/or password.", 400)
+
+        # Query database for username
+        username = request.form.get("username").lower()
+        rows = db.execute("SELECT * FROM users WHERE username = ?", username)
+
+        # Ensure username exists and password is correct
+        if len(rows) != 1 or not check_password_hash(rows[0]["hash"], request.form.get("password")):
+            return error_index("Invalid username and/or password.", 400)
+
+        # Remember which user has logged in
+        session["user_id"] = rows[0]["id"]
+
+        # Redirect user to home page
+        return redirect("/classes")
+
+    # User reached route via GET (as by clicking a link or via redirect)
+    else:
+        return render_template("index.html")
 
 @app.route("/logout")
 def logout():
@@ -501,25 +554,25 @@ def register():
 
         # Ensure username was submitted
         if not request.form.get("username") or request.form.get("username").isspace():            
-            return error("Must provide username", 400)
+            return error_register("Must provide username", 400)
 
         # Ensure password was submitted
         elif not request.form.get("password") or request.form.get("password").isspace():
-            return error("Must provide password", 400)
+            return error_register("Must provide password", 400)
 
         # Ensure confirmation was submitted
         elif not request.form.get("confirmation"):
-            return error("Passwords do not match", 400)
+            return error_register("Passwords do not match", 400)
 
         # Ensure username is unique
         username = request.form.get("username").lower()
         rows = db.execute("SELECT * FROM users WHERE username = ?", username)
         if len(rows) != 0:
-            return error("Username already taken", 400)
+            return error_register("Username already taken", 400)
 
         # Ensure password and confirmation match
         elif request.form.get("password") != request.form.get("confirmation"):
-            return error("Passwords do not match", 400)
+            return error_register("Passwords do not match", 400)
 
         # Hash password
         hash = generate_password_hash(request.form.get("password"), method="pbkdf2:sha256", salt_length=8)
@@ -571,7 +624,8 @@ def update():
     periodx = period_id[0]["id"]
     classname = period_id[0]["class"]    
     genders = db.execute("SELECT * FROM gender")
-    classes = db.execute("SELECT * FROM classes WHERE teacher = ?", session["user_id"])    
+    classes = db.execute("SELECT * FROM classes WHERE teacher = ?", session["user_id"]) 
+    students = db.execute("SELECT * FROM students WHERE class = ?", periodx)   
 
     # Get student id
     student_id = (request.args.get("studentid"))
@@ -585,10 +639,12 @@ def update():
         student_lst.append(int(your_students[i]["id"]))
     
     if not student_id:
-        return error("Select a student", 400)
+        flash("Select a student.", "error")
+        return render_template("edit.html", name=name, period=period, classname=classname, students=students, genders=genders, classes=classes)
 
     elif not student_id in student_lst:
-        return apology("Stop hacking.", 400)   
+        flash("Stop  hacking.", "error")
+        return render_template("edit.html", name=name, period=period, classname=classname, students=students, genders=genders, classes=classes)   
 
     # Get information from form
     new_name = request.form.get("name")
@@ -598,10 +654,12 @@ def update():
 
     # Validate form information
     if not new_name or new_name.isspace():
-        return apology("Student name field left blank", 400)
+        flash("Student name field left blank.", "error")
+        return render_template("edit.html", name=name, period=period, classname=classname, students=students, genders=genders, classes=classes)
     
     if not new_class:
-        return apology("Class field left blank", 400)
+        flash("Class field left blank.", "error")
+        return render_template("edit.html", name=name, period=period, classname=classname, students=students, genders=genders, classes=classes)
 
     if new_class:
         all_classes = db.execute("SELECT * FROM classes WHERE teacher = ?", session["user_id"])
@@ -610,7 +668,8 @@ def update():
             class_lst.append(all_classes[i]["class"])
         
         if new_class not in class_lst:
-            return apology("Class not in database", 400)
+            flash("Class not in database.", "error")
+            return render_template("edit.html", name=name, period=period, classname=classname, students=students, genders=genders, classes=classes)
         
         # Transform class into integer
         for i in range(len(all_classes)):
@@ -636,12 +695,14 @@ def update():
     
     if new_score:
         if not new_score.isnumeric():
-            return apology("Score must be integer 0-100", 400)
+            flash("Score must be integer 0-100", "error")
+            return render_template("edit.html", name=name, period=period, classname=classname, students=students, genders=genders, classes=classes)
         
         new_score = int(new_score)
         
         if new_score > 100 or new_score < 0:
-            return apology("Score must be integer 0-100", 400)       
+            flash("Score must be integer 0-100", "error")
+            return render_template("edit.html", name=name, period=period, classname=classname, students=students, genders=genders, classes=classes)     
     
     if not new_score:
         new_score = None   
