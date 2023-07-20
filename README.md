@@ -7,7 +7,7 @@ You can watch a live demo of the project [here](https://youtu.be/wTq7EBhY_U4).
 
 Once logged in, teachers can create and save class rosters. Classes can be archived for year-over-year functionality.
 
-![random classroom classes](https://github.com/jdittert/cs50final/assets/110644761/291e5a48-ef27-4fa1-851d-1dd68410bea9)
+![random classroom classes](https://github.com/jdittert/cs50final/random-classroom-classes.png)
 
 Teachers can group the students in each class in several ways, including Kagan-style groups (one student from each quartile, based on score). This is the feature I most wanted when I was teaching in a classroom.
 
