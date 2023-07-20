@@ -11,7 +11,7 @@ Once logged in, teachers can create and save class rosters. Classes can be archi
 
 Teachers can group the students in each class in several ways, including Kagan-style groups (one student from each quartile, based on score). This is the feature I most wanted when I was teaching in a classroom.
 
-![random classroom kagan groups](https://github.com/jdittert/cs50final/assets/110644761/1286220c-e1bf-45f4-b97f-79ad56183444)
+![random classroom kagan groups](random classroom classes.png)
 
 ## Built With
 Random Classroom was built with Python, Flask, Bootstrap, and SQLite. The log in function was imported from CS50 Finance. The SQLite library was imported from CS50. 
